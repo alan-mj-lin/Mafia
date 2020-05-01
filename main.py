@@ -101,7 +101,7 @@ def connect_test():
 
 @socketio.on('sync board')
 def sync_board(msg):
-    board = msg.data
+    board = msg["data"]
     emit('update board', {"board": board}, room=gamekey)
     emit('update board', {"board": board}, room='watcher')
 
