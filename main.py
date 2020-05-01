@@ -108,6 +108,7 @@ def sync_users():
 
 @socketio.on('board entry')
 def sync_board(msg):
+    global BOARD_HTML
     board = msg["data"]
     BOARD_HTML += board
     emit('update board', {"board": BOARD_HTML}, room=gamekey)
