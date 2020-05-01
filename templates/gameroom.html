@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bootstrap 4 Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='gameroom.js') }}"></script>
+    <style type="text/css">
+        .content-section {
+            min-height: 2000px;
+        }
+        .sidebar-section {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+        }
+
+
+        .sidebar-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            /* Position the items */
+        }
+
+
+        .make-me-sticky {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+
+            padding: 0 15px;
+        }
+
+
+
+        /* Ignore This, just coloring */
+        body {
+            background: #fff;
+        }
+
+        article {
+            background: #f1f1f1;
+            border-radius: 12px;
+            padding: 25px 0 600px;
+        }
+
+
+        .title-section, .content-section, .sidebar-section {
+            background: #fff;
+        }
+
+        .title-section {
+            text-align: center;
+            padding: 50px 15px;
+            margin-bottom: 30px;
+        }
+
+        .content-section h2 {
+            text-align: center;
+            margin: 0;
+            padding-top: 200px;
+        }
+
+        /*.sidebar-item {
+            /*text-align: center;
+
+        }*/
+        h3 {
+            background: gold;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 50px 0 100px; 
+            border-bottom: solid 1px #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="modal fade" id="screen" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="screenTitle">Night 1</h5>
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="screenSub">
+                The night begins!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Continue</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Enter Your Name</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="name" placeholder="Name..">
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="enter">Enter</button>
+            <button type="button" class="btn btn-secondary" id="observer">Narrator/Observer</button>
+            </div>
+            <div class="alert alert-danger" id="alert">
+                That name is taken
+            </div>
+        </div>
+        </div>
+    </div>
+    <article>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col">
+                    <div class="title-section">
+                        <h1>Mafia</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-7">
+                    <div class="card-columns" id="cards">
+                    </div>
+                </div>
+                
+                <div class="col-5">
+    
+                  <div class="sidebar-item">
+                    <div class="make-me-sticky" id="control">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-primary" id="start">Start Game</button>
+                            <button type="button" class="btn btn-primary" id="night" disabled>Night Start</button>
+                            <button type="button" class="btn btn-primary" id="end">End Game</button>
+                        </div>
+                    </div>
+                    <div class="make-me-sticky" id="log">
+                        
+                        <div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">
+                            <div class="media">
+                                <img class="mr-3" src="static/spyicon.jpg" alt="Generic placeholder image">
+                                <div class="media-body">
+                                <h5 class="mt-0">Pre-Game</h5>
+                                Waiting for players....
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+              
+    
+                </div>
+            </div>
+        </div>
+        
+    </article>
+    
+    <br>
+    
+    
+
+</body>
+</html>
