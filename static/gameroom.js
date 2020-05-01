@@ -1,7 +1,7 @@
 function appendToStorage(name, data){
-    var old = localStorage.getItem(name);
+    var old = sessionStorage.getItem(name);
     if(old === null) old = "";
-    localStorage.setItem(name, old + data);
+    sessionStorage.setItem(name, old + data);
 }
 
 function addMessage(title, subtitle) {
@@ -32,10 +32,10 @@ function addWatcherMessage(title, subtitle) {
 function nightProgression(socket) {
     socket.emit('disable');
     const nightString = count.toString();
-    var screen = localStorage.getItem('screen');
+    var screen = sessionStorage.getItem('screen');
     $('#screenTitle').html('Night' + nightString);
     $('#screenSub').html('Mafia pick someone to kill..');
-    localStorage.setItem('screen', $('#screen').html());
+    sessionStorage.setItem('screen', $('#screen').html());
     socket.emit('show screen');
     socket.emit('kill phase');
 }
@@ -47,7 +47,7 @@ function killPhase(target, socket) {
     const nightString = count.toString();
     $('#screenTitle').html('Night' + nightString);
     $('#screenSub').html('Doctor pick someone to save..');
-    localStorage.setItem('screen', $('#screen').html());
+    sessionStorage.setItem('screen', $('#screen').html());
     socket.emit('show screen');
     socket.emit('save phase');
 }
@@ -59,7 +59,7 @@ function savePhase(target, socket) {
     const nightString = count.toString();
     $('#screenTitle').html('Night' + nightString);
     $('#screenSub').html('Detective pick someone to interrogate..');
-    localStorage.setItem('screen', $('#screen').html());
+    sessionStorage.setItem('screen', $('#screen').html());
     socket.emit('show screen');
     socket.emit('detect phase');
 }
@@ -70,7 +70,7 @@ function detectPhase(target, socket) {
     socket.emit('detect', {name: target});
     $('#screenTitle').html('Morning');
     $('#screenSub').html('The night has ended');
-    localStorage.setItem('screen', $('#screen').html());
+    sessionStorage.setItem('screen', $('#screen').html());
     socket.emit('show screen');
     socket.emit('vote phase');
     socket.emit('message');
@@ -81,8 +81,8 @@ var count = 1;
 $(document).ready(function() {
     const socket = io.connect('https://' + document.domain + ':' + location.port);
     $('.alert').hide();
-    var board = localStorage.getItem('board');
-    var log = localStorage.getItem('log');
+    var board = sessionStorage.getItem('board');
+    var log = sessionStorage.getItem('log');
     if (log) {
         $('#log').html(log);
     }
@@ -91,7 +91,7 @@ $(document).ready(function() {
     }
 
     socket.on('show', function() {
-        var updated = localStorage.getItem('screen');
+        var updated = sessionStorage.getItem('screen');
         $('#screen').html(updated);
         $('#screen').modal('show');
     });
@@ -101,23 +101,23 @@ $(document).ready(function() {
     });
 
     socket.on('update', function(){
-        var updated = localStorage.getItem('board');
+        var updated = sessionStorage.getItem('board');
         $('#cards').html(updated);
     });
 
     socket.on('update board', function(msg){
         const board = msg.board;
         $('#cards').html(board);
-        localStorage.setItem('board', $('#cards').html());
+        sessionStorage.setItem('board', $('#cards').html());
     });
 
     socket.on('update log', function(){
-        var updated = localStorage.getItem('log');
+        var updated = sessionStorage.getItem('log');
         $('#log').html(updated);
     });
 
     socket.on('update watcher log', function(){
-        var updated = localStorage.getItem('watcher');
+        var updated = sessionStorage.getItem('watcher');
         $('#log').html(updated);
     });
 
@@ -222,7 +222,7 @@ $(document).ready(function() {
             socket.emit('message');
             $('#screenTitle').html('Mafia Win');
             $('#screenSub').html('Everyone dies a horrible death under dictatorship rule');
-            localStorage.setItem('screen', $('#screen').html());
+            sessionStorage.setItem('screen', $('#screen').html());
             socket.emit('show screen');
 
         } else {
@@ -231,7 +231,7 @@ $(document).ready(function() {
             socket.emit('message');
             $('#screenTitle').html('Village Wins');
             $('#screenSub').html('The Mafia were hanged and their families were enslaved for compensation of the dead villagers');
-            localStorage.setItem('screen', $('#screen').html());
+            sessionStorage.setItem('screen', $('#screen').html());
             socket.emit('show screen');
         }
         socket.emit('disable');
@@ -243,7 +243,7 @@ $(document).ready(function() {
     });
 
     socket.on('clear storage', function(){
-        localStorage.clear();
+        sessionStorage.clear();
     });
 
     $('#enter').click(function(){
@@ -271,7 +271,7 @@ $(document).ready(function() {
                                     );
             $('#modal').modal('hide');
             socket.emit('add player', {name: $('#name').val()});
-            board = localStorage.getItem('board');
+            board = sessionStorage.getItem('board');
             socket.emit('sync board', {data: board});
         } else {
             $('.alert').show();
@@ -321,13 +321,13 @@ $(document).ready(function() {
     })
 
     $('#start').on('click', function() {
-        var log = localStorage.getItem('log');
-        var watcher_log = localStorage.getItem('watcher')
+        var log = sessionStorage.getItem('log');
+        var watcher_log = sessionStorage.getItem('watcher')
         if (log == null) {
-            localStorage.setItem('log', $('#log').html());
+            sessionStorage.setItem('log', $('#log').html());
         }
         if (watcher_log == null) {
-            localStorage.setItem('watcher', $('#log').html());
+            sessionStorage.setItem('watcher', $('#log').html());
         }
         addMessage('Shuffling Roles', 'Randomly assign everyone a role');
         addWatcherMessage('Shuffling Roles', 'Randomly assign everyone a role');
@@ -350,7 +350,7 @@ $(document).ready(function() {
     $('#end').on('click', function(){
         addMessage('Game Over', 'The game has ended');
         socket.emit('message');
-        localStorage.clear();
+        sessionStorage.clear();
         socket.emit('clear');
     });
 });
