@@ -82,6 +82,7 @@ $(document).ready(function() {
     const socket = io.connect('https://' + document.domain + ':' + location.port);
     socket.emit('sync users');
     $('.alert').hide();
+    /*
     var board = sessionStorage.getItem('board');
     var log = sessionStorage.getItem('log');
     if (log) {
@@ -89,7 +90,7 @@ $(document).ready(function() {
     }
     if (board){
         $('#cards').html(board);
-    }
+    }*/
 
     socket.on('show', function() {
         var updated = sessionStorage.getItem('screen');
@@ -250,6 +251,18 @@ $(document).ready(function() {
     $('#enter').click(function(){
         var Name = $('#name').val();
         var duplicate = false;
+        var temp = '<div class="card" id="' +Name+'" style="width: 18rem;">\
+                        <img src="static/spyicon.png" class="card-img-top" alt="...">\
+                        <div class="card-body">\
+                            <h5 class="card-title">' + Name + '</h5>\
+                            <p class="card-text" id="' + Name+ '_status">Status: Alive</p>\
+                            <p class="card-text" id="' + Name+ '_role">???</p>\
+                            <a name="kill" id="'+Name+'_kill" class="btn btn-primary disabled">Kill</a>\
+                            <a name="save" id="'+Name+'_save" class="btn btn-secondary disabled">Save</a>\
+                            <a name="detect" id="'+Name+'_detect" class="btn btn-secondary disabled">Detect</a>\
+                            <a name="hang" id="'+Name+'_hang" class="btn btn-secondary disabled">Hang</a>\
+                        </div>\
+                    </div>'
         $('.card').each(function(){
             if ($(this).attr("id") == Name) {
                 console.log($(this).attr("id"));
@@ -257,23 +270,11 @@ $(document).ready(function() {
             }
         })
         if (!duplicate){
-            appendToStorage('board', '<div class="card" id="' +Name+'" style="width: 18rem;">\
-                                        <img src="static/spyicon.png" class="card-img-top" alt="...">\
-                                        <div class="card-body">\
-                                            <h5 class="card-title">' + Name + '</h5>\
-                                            <p class="card-text" id="' + Name+ '_status">Status: Alive</p>\
-                                            <p class="card-text" id="' + Name+ '_role">???</p>\
-                                            <a name="kill" id="'+Name+'_kill" class="btn btn-primary disabled">Kill</a>\
-                                            <a name="save" id="'+Name+'_save" class="btn btn-secondary disabled">Save</a>\
-                                            <a name="detect" id="'+Name+'_detect" class="btn btn-secondary disabled">Detect</a>\
-                                            <a name="hang" id="'+Name+'_hang" class="btn btn-secondary disabled">Hang</a>\
-                                        </div>\
-                                    </div>'
-                                    );
+            appendToStorage('board', temp);
             $('#modal').modal('hide');
             socket.emit('add player', {name: $('#name').val()});
             board = sessionStorage.getItem('board');
-            socket.emit('board entry', {data: board});
+            socket.emit('board entry', {data: temp});
         } else {
             $('.alert').show();
         }
