@@ -103,8 +103,7 @@ def connect_test():
 
 @socketio.on('sync users')
 def sync_users():
-    emit('update board', {"board": BOARD_HTML}, room=gamekey)
-    emit('update board', {"board": BOARD_HTML}, room='watcher')
+    emit('update board', {"board": BOARD_HTML})
 
 @socketio.on('board entry')
 def sync_board(msg):
