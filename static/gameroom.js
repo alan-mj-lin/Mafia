@@ -355,3 +355,7 @@ $(document).ready(function() {
         socket.emit('clear');
     });
 });
+
+$(window).on("unload", function(){
+    sessionStorage.clear();
+});
