@@ -349,5 +349,7 @@ if __name__ == '__main__':
         app, 
         host='0.0.0.0', 
         port=9000, 
-        debug=True
+        debug=True,
+        certfile='/etc/letsencrypt/live/service.tjcav.com/fullchain.pem', 
+        keyfile='/etc/letsencrypt/live/service.tjcav.com/privkey.pem'
     )

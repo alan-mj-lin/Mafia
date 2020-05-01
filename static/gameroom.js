@@ -79,7 +79,7 @@ function detectPhase(target, socket) {
 var count = 1;
 
 $(document).ready(function() {
-    const socket = io.connect('http://' + document.domain + ':' + location.port);
+    const socket = io.connect('https://' + document.domain + ':' + location.port);
     $('.alert').hide();
     var board = localStorage.getItem('board');
     var log = localStorage.getItem('log');
