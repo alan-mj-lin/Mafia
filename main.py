@@ -34,6 +34,8 @@ activity = {
         'save': ''
     }
 
+BOARD_HTML = ''
+
 def generateGameRoomKey(length=8):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for i in range(length))
@@ -99,11 +101,17 @@ def connect_test():
     """
     emit('get name')
 
-@socketio.on('sync board')
+@socketio.on('sync users')
+def sync_users():
+    emit('update board', {"board": BOARD_HTML}, room=gamekey)
+    emit('update board', {"board": BOARD_HTML}, room='watcher')
+
+@socketio.on('board entry')
 def sync_board(msg):
     board = msg["data"]
-    emit('update board', {"board": board}, room=gamekey)
-    emit('update board', {"board": board}, room='watcher')
+    BOARD_HTML += board
+    emit('update board', {"board": BOARD_HTML}, room=gamekey)
+    emit('update board', {"board": BOARD_HTML}, room='watcher')
 
 @socketio.on('observe')
 def observe():

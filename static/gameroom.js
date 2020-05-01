@@ -80,6 +80,7 @@ var count = 1;
 
 $(document).ready(function() {
     const socket = io.connect('https://' + document.domain + ':' + location.port);
+    socket.emit('sync users');
     $('.alert').hide();
     var board = sessionStorage.getItem('board');
     var log = sessionStorage.getItem('log');
@@ -272,7 +273,7 @@ $(document).ready(function() {
             $('#modal').modal('hide');
             socket.emit('add player', {name: $('#name').val()});
             board = sessionStorage.getItem('board');
-            socket.emit('sync board', {data: board});
+            socket.emit('board entry', {data: board});
         } else {
             $('.alert').show();
         }
