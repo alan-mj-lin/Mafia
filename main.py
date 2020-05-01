@@ -99,6 +99,12 @@ def connect_test():
     """
     emit('get name')
 
+@socketio.on('sync board')
+def sync_board(msg):
+    board = msg.data
+    emit('update board', {"board": board}, room=gamekey)
+    emit('update board', {"board": board}, room='watcher')
+
 @socketio.on('observe')
 def observe():
     join_room('watcher')

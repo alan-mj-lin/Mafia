@@ -105,6 +105,12 @@ $(document).ready(function() {
         $('#cards').html(updated);
     });
 
+    socket.on('update board', function(msg){
+        const board = msg.board;
+        $('#cards').html(board);
+        localStorage.setItem('board', $('#cards').html());
+    });
+
     socket.on('update log', function(){
         var updated = localStorage.getItem('log');
         $('#log').html(updated);
@@ -261,6 +267,8 @@ $(document).ready(function() {
                                     );
             $('#modal').modal('hide');
             socket.emit('add player', {name: $('#name').val()});
+            board = localStorage.getItem('board');
+            socket.emit('sync board', {data: board});
         } else {
             $('.alert').show();
         }
