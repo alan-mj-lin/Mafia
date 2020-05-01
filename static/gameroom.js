@@ -242,6 +242,10 @@ $(document).ready(function() {
         $('a[name="hang"]').addClass('disabled');
     });
 
+    socket.on('clear storage', function(){
+        localStorage.clear();
+    });
+
     $('#enter').click(function(){
         var Name = $('#name').val();
         var duplicate = false;

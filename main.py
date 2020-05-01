@@ -138,6 +138,8 @@ def clear():
     players = []
     numMafia = 0
     roles = []
+    emit('clear storage', room=gamekey)
+    emit('clear storage', room='watcher')
 
 @socketio.on('shuffle')
 def shuffle():
