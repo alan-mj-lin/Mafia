@@ -141,11 +141,12 @@ def add_player(message):
 
 @socketio.on('clear')
 def clear():
-    global gamekey, players, numMafia, roles
+    global gamekey, players, numMafia, roles, BOARD_HTML
     gamekey = 'ffffffff'
     players = []
     numMafia = 0
     roles = []
+    BOARD_HTML = ''
     emit('clear storage', room=gamekey)
     emit('clear storage', room='watcher')
 
