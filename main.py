@@ -103,8 +103,6 @@ def home():
 def process():
     global numMafia, gamekey
     numMafia = int(request.form['mafia'])
-    #json = str(temp['mafia'].value)
-    #numMafia = int(temp)
     print(numMafia)
     gamekey = generateGameRoomKey()
     return jsonify({'redirect': gamekey})
@@ -379,9 +377,11 @@ def detect_check(message):
         for i in players:
             if i.name == target and i.status=='active' and i.role != 'detective':
                 emit('enter detect phase', {"name": i.name}, room=gamekey)
+                win_check()
     else:
         emit('enter detect phase', {"name": ''}, room=gamekey)
-
+        win_check()
+        
 @socketio.on('vote phase')
 def open_season():
     global gamekey
