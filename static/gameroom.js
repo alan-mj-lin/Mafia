@@ -1,9 +1,3 @@
-function appendToStorage(name, data){
-    var old = sessionStorage.getItem(name);
-    if(old === null) old = "";
-    sessionStorage.setItem(name, old + data);
-}
-
 function addMessage(title, subtitle, socket) {
     const text = '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
                                 <div class="media">\
@@ -83,7 +77,6 @@ $(document).ready(function() {
     socket.on('update board', function(msg){
         const board = msg.board;
         $('#cards').html(board);
-        sessionStorage.setItem('board', $('#cards').html());
     });
 
     socket.on('update log', function(msg){
@@ -194,9 +187,6 @@ $(document).ready(function() {
 
         } else {
             addMessage('Village Win', 'The Mafia have been weeded out and hanged', socket);
-            $('#screenTitle').html('Village Wins');
-            $('#screenSub').html('The Mafia were hanged and their families were enslaved for compensation of the dead villagers');
-            sessionStorage.setItem('screen', $('#screen').html());
             socket.emit('show screen', {
                 title: 'Village Win', 
                 subtitle: 'The Mafia were hanged and their families were enslaved for compensation of the dead villagers'
@@ -282,15 +272,7 @@ $(document).ready(function() {
         socket.emit('observe');
     })
 
-    $('#start').on('click', function() {
-        var log = sessionStorage.getItem('log');
-        var watcher_log = sessionStorage.getItem('watcher')
-        if (log == null) {
-            sessionStorage.setItem('log', $('#log').html());
-        }
-        if (watcher_log == null) {
-            sessionStorage.setItem('watcher', $('#log').html());
-        }
+    $('#start').on('click', function() {       
         addMessage('Shuffling Roles', 'Randomly assign everyone a role', socket);
         socket.emit('shuffle');
         addMessage('Start', 'Game started! The hunt begins..', socket);
