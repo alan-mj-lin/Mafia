@@ -335,22 +335,34 @@ def save(message):
 @socketio.on('save check')
 def save_check(message):
     global current_save
-    target = message['target']
-    doctor_alive = True
-    current_save = target
+    cheat = False
     for i in players:
-        if i.role =='doctor' and i.status == 'dead':
-            doctor_alive = False
+        if i.role == 'doctor' and i.sid == request.sid:
+            print(i.role, i.sid, request.sid)
+            print(cheat)
+            print(not cheat)
+            cheat = False
+            break
+        else:
+            cheat = True
     
-    if doctor_alive:
-        check = self_save_check()
-        print(check)
-        if check:
-            for i in players:
-                if i.name == target and i.status=='active':
-                    emit('enter save phase', {"name": i.name}, room=gamekey)
-    else:
-        emit('enter save phase', {"name": ''}, room=gamekey)
+    if not cheat:
+        target = message['target']
+        doctor_alive = True
+        current_save = target
+        for i in players:
+            if i.role =='doctor' and i.status == 'dead':
+                doctor_alive = False
+        
+        if doctor_alive:
+            check = self_save_check()
+            print(check)
+            if check:
+                for i in players:
+                    if i.name == target and i.status=='active':
+                        emit('enter save phase', {"name": i.name}, room=gamekey)
+        else:
+            emit('enter save phase', {"name": ''}, room=gamekey)
 
 @socketio.on('detect phase')
 def detect_phase():
@@ -383,20 +395,32 @@ def detect(message):
 
 @socketio.on('detect check')
 def detect_check(message):
-    target = message['target']
-    detective_alive = True
+    cheat = False
     for i in players:
-        if i.role == 'detective' and i.status=='dead':
-            detective_alive = False
+        if i.role == 'detective' and i.sid == request.sid:
+            print(i.role, i.sid, request.sid)
+            print(cheat)
+            print(not cheat)
+            cheat = False
+            break
+        else:
+            cheat = True
     
-    if detective_alive:
+    if not cheat:
+        target = message['target']
+        detective_alive = True
         for i in players:
-            if i.name == target and i.status=='active' and i.role != 'detective':
-                emit('enter detect phase', {"name": i.name}, room=gamekey)
-                evaluate()
-    else:
-        emit('enter detect phase', {"name": ''}, room=gamekey)
-        evaluate()
+            if i.role == 'detective' and i.status=='dead':
+                detective_alive = False
+        
+        if detective_alive:
+            for i in players:
+                if i.name == target and i.status=='active' and i.role != 'detective':
+                    emit('enter detect phase', {"name": i.name}, room=gamekey)
+                    evaluate()
+        else:
+            emit('enter detect phase', {"name": ''}, room=gamekey)
+            evaluate()
         
 
 @socketio.on('vote phase')
