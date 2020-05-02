@@ -318,6 +318,7 @@ def save_check(message):
     
     if doctor_alive:
         check = self_save_check()
+        print(check)
         if check:
             for i in players:
                 if i.name == target and i.status=='active':
