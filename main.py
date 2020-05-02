@@ -130,7 +130,9 @@ def sync_board(msg):
 
 @socketio.on('observe')
 def observe():
+    global WATCHER_LOG
     join_room('watcher')
+    emit('update log', {'data': WATCHER_LOG}, room='watcher')
 
 @socketio.on('message')
 def message(msg):
