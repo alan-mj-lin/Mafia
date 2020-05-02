@@ -214,8 +214,8 @@ $(document).ready(function() {
         sessionStorage.clear();
     });
 
-    socket.on('status return', function(status){
-        const detective_status  = status;
+    socket.on('status return', function(msg){
+        const detective_status  = msg.status;
         if (detective_status == 'False'){
             socket.emit('evaluate');
         }
