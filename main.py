@@ -35,6 +35,17 @@ activity = {
     }
 
 BOARD_HTML = ''
+LOG = '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
+            <div class="media">\
+                <img class="mr-3" src="static/spyicon.jpg" alt="Generic placeholder image">\
+                <div class="media-body">\
+                <h5 class="mt-0">Pre-Game</h5>\
+                Waiting for players....\
+                </div>\
+            </div>\
+        </div>'
+WATCHER_LOG = ''
+SCREEN_TEXT = ['', '']
 
 def generateGameRoomKey(length=8):
     letters = string.ascii_letters
@@ -118,14 +129,20 @@ def observe():
     join_room('watcher')
 
 @socketio.on('message')
-def message():
-    global gamekey
-    emit('update log', room=gamekey)
-    emit('update watcher log', room='watcher')
+def message(msg):
+    global gamekey, LOG, WATCHER_LOG
+    text = msg['data']
+    LOG += text
+    WATCHER_LOG += text
+    emit('update log', {'data': LOG}, room=gamekey)
+    emit('update log', {'data': WATCHER_LOG}, room='watcher')
 
 @socketio.on('watcher message')
-def watcher_message():
-    emit('update watcher log', room='watcher')
+def watcher_message(msg):
+    global WATCHER_LOG
+    text = msg['data']
+    WATCHER_LOG += text
+    emit('update log', {'data': WATCHER_LOG}, room='watcher')
 
 @socketio.on('add player')
 def add_player(message):
@@ -135,18 +152,26 @@ def add_player(message):
     player = Player(message['name'], sid)
     players.append(player)
     join_room(gamekey)
-    emit('update', room=gamekey)
-    emit('update', room='watcher')
     emit('add event listeners', {"name": player.name}, room=gamekey)
 
 @socketio.on('clear')
 def clear():
-    global gamekey, players, numMafia, roles, BOARD_HTML
+    global gamekey, players, numMafia, roles, BOARD_HTML, LOG, WATCHER_LOG
     gamekey = 'ffffffff'
     players = []
     numMafia = 0
     roles = []
     BOARD_HTML = ''
+    LOG = '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
+            <div class="media">\
+                <img class="mr-3" src="static/spyicon.jpg" alt="Generic placeholder image">\
+                <div class="media-body">\
+                <h5 class="mt-0">Pre-Game</h5>\
+                Waiting for players....\
+                </div>\
+            </div>\
+        </div>'
+    WATCHER_LOG = ''
     emit('clear storage', room=gamekey)
     emit('clear storage', room='watcher')
 
@@ -190,8 +215,11 @@ def shuffle():
                     emit('assign', {name : i.role}, room=j.sid)
 
 @socketio.on('show screen')
-def show_screen():
-    emit('show', room=gamekey)
+def show_screen(msg):
+    global SCREEN_TEXT
+    SCREEN_TEXT[0] = msg.title
+    SCREEN_TEXT[1] = msg.subtitle
+    emit('show', {'title': SCREEN_TEXT[0], 'subtitle': SCREEN_TEXT[1]}, room=gamekey)
 
 @socketio.on('disable start')
 def disable_start():

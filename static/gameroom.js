@@ -4,8 +4,8 @@ function appendToStorage(name, data){
     sessionStorage.setItem(name, old + data);
 }
 
-function addMessage(title, subtitle) {
-    appendToStorage('log', '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
+function addMessage(title, subtitle, socket) {
+    const text = '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
                                 <div class="media">\
                                     <img class="mr-3" src="static/spyicon.jpg" alt="Generic placeholder image">\
                                     <div class="media-body">\
@@ -13,11 +13,12 @@ function addMessage(title, subtitle) {
                                      + subtitle + '\
                                     </div>\
                                 </div>\
-                            </div>')
+                            </div>'
+    socket.emit('message',{data: text});
 }
 
-function addWatcherMessage(title, subtitle) {
-    appendToStorage('watcher', '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
+function addWatcherMessage(title, subtitle, socket) {
+    const text = '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
                                 <div class="media">\
                                     <img class="mr-3" src="static/spyicon.jpg" alt="Generic placeholder image">\
                                     <div class="media-body">\
@@ -25,18 +26,15 @@ function addWatcherMessage(title, subtitle) {
                                      + subtitle + '\
                                     </div>\
                                 </div>\
-                            </div>')
+                            </div>'
+    socket.emit('watcher message', {data: text});
 }
 
 //game progression functions
 function nightProgression(socket) {
     socket.emit('disable');
     const nightString = count.toString();
-    var screen = sessionStorage.getItem('screen');
-    $('#screenTitle').html('Night' + nightString);
-    $('#screenSub').html('Mafia pick someone to kill..');
-    sessionStorage.setItem('screen', $('#screen').html());
-    socket.emit('show screen');
+    socket.emit('show screen', {title: 'Night ' + nightString, subtitle: 'Mafia pick someone to kill..'});
     socket.emit('kill phase');
 }
 
@@ -45,10 +43,7 @@ function killPhase(target, socket) {
     document.getElementsByName('kill').disabled = true;
     socket.emit('kill', {name: target});
     const nightString = count.toString();
-    $('#screenTitle').html('Night' + nightString);
-    $('#screenSub').html('Doctor pick someone to save..');
-    sessionStorage.setItem('screen', $('#screen').html());
-    socket.emit('show screen');
+    socket.emit('show screen', {title: 'Night ' + nightString, subtitle: 'Doctor pick someone to save..'});
     socket.emit('save phase');
 }
 
@@ -57,10 +52,7 @@ function savePhase(target, socket) {
     document.getElementsByName('save').disabled = true;
     socket.emit('save', {name: target});
     const nightString = count.toString();
-    $('#screenTitle').html('Night' + nightString);
-    $('#screenSub').html('Detective pick someone to interrogate..');
-    sessionStorage.setItem('screen', $('#screen').html());
-    socket.emit('show screen');
+    socket.emit('show screen', {title: 'Night ' + nightString, subtitle: 'Detective pick someone to interrogate..'});
     socket.emit('detect phase');
 }
 
@@ -68,12 +60,8 @@ function detectPhase(target, socket) {
     socket.emit('disable')
     document.getElementsByName('detect').disabled = true;
     socket.emit('detect', {name: target});
-    $('#screenTitle').html('Morning');
-    $('#screenSub').html('The night has ended');
-    sessionStorage.setItem('screen', $('#screen').html());
-    socket.emit('show screen');
+    socket.emit('show screen', {title: 'Morning', subtitle: 'The night has ended'});
     socket.emit('vote phase');
-    socket.emit('message');
 }
 
 var count = 1;
@@ -82,29 +70,15 @@ $(document).ready(function() {
     const socket = io.connect('https://' + document.domain + ':' + location.port);
     socket.emit('sync users');
     $('.alert').hide();
-    /*
-    var board = sessionStorage.getItem('board');
-    var log = sessionStorage.getItem('log');
-    if (log) {
-        $('#log').html(log);
-    }
-    if (board){
-        $('#cards').html(board);
-    }*/
 
-    socket.on('show', function() {
-        var updated = sessionStorage.getItem('screen');
-        $('#screen').html(updated);
+    socket.on('show', function(msg) {
+        $('#screenTitle').html(msg.title);
+        $('#screenSub').html(msg.subtitle);
         $('#screen').modal('show');
     });
 
     socket.on('get name', function(){
         $('#modal').modal('show');
-    });
-
-    socket.on('update', function(){
-        var updated = sessionStorage.getItem('board');
-        $('#cards').html(updated);
     });
 
     socket.on('update board', function(msg){
@@ -113,13 +87,8 @@ $(document).ready(function() {
         sessionStorage.setItem('board', $('#cards').html());
     });
 
-    socket.on('update log', function(){
-        var updated = sessionStorage.getItem('log');
-        $('#log').html(updated);
-    });
-
-    socket.on('update watcher log', function(){
-        var updated = sessionStorage.getItem('watcher');
+    socket.on('update log', function(msg){
+        const updated = msg.data;
         $('#log').html(updated);
     });
 
@@ -201,11 +170,9 @@ $(document).ready(function() {
         const display_string = display.toString();
         const death = msg.deaths
         if (death == ''){
-            addMessage('Night ' + display_string, 'All live to see another day..');
-            addWatcherMessage('Night ' + display_string, 'All live to see another day..');
+            addMessage('Night ' + display_string, 'All live to see another day..', socket);
         } else {
-            addMessage('Night ' + display_string, death + ' was killed');
-            addWatcherMessage('Night ' + display_string, death + ' was killed');
+            addMessage('Night ' + display_string, death + ' was killed', socket);
         }
         socket.emit('increment', {night: count});
     });
@@ -219,22 +186,21 @@ $(document).ready(function() {
         const result = msg.winners;
         console.log(result);
         if (result == 'mafia'){
-            addMessage('Mafia Win', 'The Mafia have overthrown the townspeople, all who remain were executed');
-            addWatcherMessage('Mafia Win', 'The Mafia have overthrown the townspeople, all who remain were executed');
-            socket.emit('message');
-            $('#screenTitle').html('Mafia Win');
-            $('#screenSub').html('Everyone dies a horrible death under dictatorship rule');
-            sessionStorage.setItem('screen', $('#screen').html());
-            socket.emit('show screen');
+            addMessage('Mafia Win', 'The Mafia have overthrown the townspeople, all who remain were executed', socket);
+            socket.emit('show screen', {
+                title: 'Mafia Win', 
+                subtitle: 'The Mafia have overthrown the townspeople, all who remain were executed'
+            });
 
         } else {
-            addMessage('Village Win', 'The Mafia have been weeded out and hanged');
-            addWatcherMessage('Village Win', 'The Mafia have been weeded out and hanged');
-            socket.emit('message');
+            addMessage('Village Win', 'The Mafia have been weeded out and hanged', socket);
             $('#screenTitle').html('Village Wins');
             $('#screenSub').html('The Mafia were hanged and their families were enslaved for compensation of the dead villagers');
             sessionStorage.setItem('screen', $('#screen').html());
-            socket.emit('show screen');
+            socket.emit('show screen', {
+                title: 'Village Win', 
+                subtitle: 'The Mafia were hanged and their families were enslaved for compensation of the dead villagers'
+            });
         }
         socket.emit('disable');
         socket.emit('disable start');
@@ -270,11 +236,9 @@ $(document).ready(function() {
             }
         })
         if (!duplicate){
-            appendToStorage('board', temp);
             $('#modal').modal('hide');
-            socket.emit('add player', {name: $('#name').val()});
-            board = sessionStorage.getItem('board');
             socket.emit('board entry', {data: temp});
+            socket.emit('add player', {name: $('#name').val()});
         } else {
             $('.alert').show();
         }
@@ -282,15 +246,13 @@ $(document).ready(function() {
 
     $(document).on("click", "a[name='kill']", function(){
         const name = $(this).attr('id').split("_")[0];
-        addWatcherMessage('Kill Event', 'Mafia wants to kill ' + name);
-        socket.emit('watcher message');
+        addWatcherMessage('Kill Event', 'Mafia wants to kill ' + name, socket);
         socket.emit('kill check', {target: name});
     });
 
     $(document).on("click", "a[name='save']", function(){
         const name = $(this).attr('id').split("_")[0];
-        addWatcherMessage('Save Event', 'Doctor wants to save ' + name);
-        socket.emit('watcher message');
+        addWatcherMessage('Save Event', 'Doctor wants to save ' + name, socket);
         socket.emit('save check', {target: name});
     });
 
@@ -299,8 +261,7 @@ $(document).ready(function() {
         const status = $('#'+name+'_status').html();
         const role = $('#'+name+'_role').html();
         socket.emit('detect check', {target: name});
-        addWatcherMessage('Detect Event', 'Detective wants to check ' + name);
-        socket.emit('watcher message');
+        addWatcherMessage('Detect Event', 'Detective wants to check ' + name, socket);
         if (status == 'Status: Alive' && role == '???'){
             socket.emit('evaluate');
         }
@@ -313,6 +274,7 @@ $(document).ready(function() {
         if (status == 'Status: Alive') {
             socket.emit('hang', {target: name});
             $('a[name="hang"]').addClass('disabled');
+            addMessage('Town Hall', name +' was executed by the townspeople', socket);
             socket.emit('disable hang');
         }
     });
@@ -331,27 +293,20 @@ $(document).ready(function() {
         if (watcher_log == null) {
             sessionStorage.setItem('watcher', $('#log').html());
         }
-        addMessage('Shuffling Roles', 'Randomly assign everyone a role');
-        addWatcherMessage('Shuffling Roles', 'Randomly assign everyone a role');
-        socket.emit('message');
+        addMessage('Shuffling Roles', 'Randomly assign everyone a role', socket);
         socket.emit('shuffle');
-        addMessage('Start', 'Game started! The hunt begins..');
-        addWatcherMessage('Start', 'Game started! The hunt begins..');
-        socket.emit('message');
+        addMessage('Start', 'Game started! The hunt begins..', socket);
         socket.emit('disable start');
         nightProgression(socket);
     });
 
     $('#night').click(function() {
-        addMessage('A Night Begins!', 'Everyone goes to sleep..');
-        addWatcherMessage('A Night Begins!', 'Everyone goes to sleep..');
-        socket.emit('message');
+        addMessage('A Night Begins!', 'Everyone goes to sleep..', socket);
         nightProgression(socket);
     });
 
     $('#end').on('click', function(){
-        addMessage('Game Over', 'The game has ended');
-        socket.emit('message');
+        addMessage('Game Over', 'The game has ended', socket);
         sessionStorage.clear();
         socket.emit('clear');
     });
