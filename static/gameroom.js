@@ -213,7 +213,7 @@ $(document).ready(function() {
     socket.on('clear storage', function(){
         sessionStorage.clear();
     });
-    
+
     $('#enter').click(function(){
         var Name = $('#name').val();
         var duplicate = false;
@@ -263,9 +263,6 @@ $(document).ready(function() {
         const role = $('#'+name+'_role').html();
         socket.emit('detect check', {target: name});
         addWatcherMessage('Detect Event', 'Detective wants to check ' + name, socket);
-        if (status == 'Status: Alive' && role == '???'){
-            socket.emit('evaluate');
-        }
     });
 
     $(document).on("click", "a[name='hang']", function(){

@@ -69,6 +69,20 @@ def self_save_check():
     elif prev_save == doctor and current_save == doctor:
         return False
 
+def evaluate():
+    saved = activity['save']
+    killed = activity['target']
+    sid = players[0].sid
+    death = ''
+    for i in players:
+        if i.name == killed and saved != killed:
+            i.status = 'dead'
+            death = i.name
+        elif i.name == killed and saved == killed:
+            pass
+    emit('death message', {"deaths": death}, room=sid)
+    win_check()
+
 def win_check():
     dead_mafia = 0
     civilians = 0
@@ -179,18 +193,6 @@ def add_player(message):
     players.append(player)
     emit('add event listeners', {"name": player.name}, room=gamekey)
 
-@socketio.on('detective status')
-def detective_status():
-    global players
-    status = 'True'
-    for i in players:
-        if i.role == 'detective' and i.status == 'dead':
-            status = 'False'
-        else:
-            status = 'True'
-
-    emit('status return', {"status": status})
-
 @socketio.on('clear')
 def clear():
     global gamekey, players, numMafia, roles, BOARD_HTML, LOG, WATCHER_LOG, current_save, prev_save
@@ -292,7 +294,6 @@ def hang_and_win_check(message):
 
     win_check()
 
-
 @socketio.on('kill check')
 def kill_check(message):
     target = message['target']
@@ -377,11 +378,12 @@ def detect_check(message):
         for i in players:
             if i.name == target and i.status=='active' and i.role != 'detective':
                 emit('enter detect phase', {"name": i.name}, room=gamekey)
-                win_check()
+                evaluate()
     else:
         emit('enter detect phase', {"name": ''}, room=gamekey)
-        win_check()
+        evaluate()
         
+
 @socketio.on('vote phase')
 def open_season():
     global gamekey
@@ -406,21 +408,6 @@ def open_season():
                     "role": j.role
                     }, 
                     room=i.sid)
-
-@socketio.on('evaluate')
-def evaluate():
-    saved = activity['save']
-    killed = activity['target']
-    sid = players[0].sid
-    death = ''
-    for i in players:
-        if i.name == killed and saved != killed:
-            i.status = 'dead'
-            death = i.name
-        elif i.name == killed and saved == killed:
-            pass
-    emit('death message', {"deaths": death}, room=sid)
-    win_check()
 
 @socketio.on('enable night')
 def enable_night():
