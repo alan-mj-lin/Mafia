@@ -56,12 +56,12 @@ def generateGameRoomKey(length=8):
 
 
 def self_save_check():
-    global players
+    global players, prev_save, current_save
     doctor = ''
     for i in players:
         if i.role == 'doctor':
             doctor = i.name
-
+    print(current_save, prev_save)
     if prev_save == '':
         return True
     elif prev_save == doctor and current_save == doctor:
@@ -196,7 +196,9 @@ def clear():
                 </div>\
             </div>\
         </div>'
-    WATCHER_LOG = ''
+    WATCHER_LOG = LOG
+    current_save = ''
+    prev_save = ''
     emit('clear storage', room=gamekey)
     emit('clear storage', room='watcher')
 
