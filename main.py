@@ -64,7 +64,7 @@ def self_save_check():
     print(current_save, prev_save)
     if prev_save == '':
         return True
-    elif prev_save != doctor and current_save != doctor:
+    elif prev_save != doctor or current_save != doctor:
         return True
     elif prev_save == doctor and current_save == doctor:
         return False
