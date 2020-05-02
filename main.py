@@ -394,6 +394,8 @@ def open_season():
                     "role": j.role
                     }, 
                     room=i.sid)
+                    
+    win_check()
 
 @socketio.on('evaluate')
 def evaluate():
