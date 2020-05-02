@@ -214,6 +214,14 @@ $(document).ready(function() {
         sessionStorage.clear();
     });
 
+    socket.on('status return', function(status){
+        const detective_status  = status;
+        if (detective_status == 'False'){
+            socket.emit('evaluate');
+        }
+        
+    });
+    
     $('#enter').click(function(){
         var Name = $('#name').val();
         var duplicate = false;
@@ -266,6 +274,7 @@ $(document).ready(function() {
         if (status == 'Status: Alive' && role == '???'){
             socket.emit('evaluate');
         }
+        socket.emit('detective status');
     });
 
     $(document).on("click", "a[name='hang']", function(){

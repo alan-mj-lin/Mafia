@@ -181,6 +181,18 @@ def add_player(message):
     players.append(player)
     emit('add event listeners', {"name": player.name}, room=gamekey)
 
+@socketio.on('detective status')
+def detective_status():
+    global players
+    status = 'True'
+    for i in players:
+        if i.role == 'detective' and i.status == 'dead':
+            status = 'False'
+        else:
+            status = 'True'
+
+    emit('status return', {"status": status})
+
 @socketio.on('clear')
 def clear():
     global gamekey, players, numMafia, roles, BOARD_HTML, LOG, WATCHER_LOG, current_save, prev_save
@@ -394,7 +406,7 @@ def open_season():
                     "role": j.role
                     }, 
                     room=i.sid)
-                    
+
     win_check()
 
 @socketio.on('evaluate')
