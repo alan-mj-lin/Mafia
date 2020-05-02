@@ -60,7 +60,6 @@ function detectPhase(target, socket) {
     socket.emit('disable')
     document.getElementsByName('detect').disabled = true;
     socket.emit('detect', {name: target});
-    socket.emit('show screen', {title: 'Morning', subtitle: 'The night has ended'});
     socket.emit('vote phase');
 }
 
@@ -127,6 +126,7 @@ $(document).ready(function() {
     });
 
     socket.on('enter detect phase', function(msg){
+        socket.emit('show screen', {title: 'Morning', subtitle: 'The night has ended'});
         detectPhase(msg.name, socket);
     });
 
