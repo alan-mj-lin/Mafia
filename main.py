@@ -407,8 +407,6 @@ def open_season():
                     }, 
                     room=i.sid)
 
-    win_check()
-
 @socketio.on('evaluate')
 def evaluate():
     saved = activity['save']
