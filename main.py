@@ -47,10 +47,25 @@ LOG = '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
 WATCHER_LOG = LOG
 SCREEN_TEXT = ['', '']
 
+current_save = ''
+prev_save = ''
+
 def generateGameRoomKey(length=8):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for i in range(length))
 
+
+def self_save_check():
+    global players
+    doctor = ''
+    for i in players:
+        if i.role == 'doctor':
+            doctor = i.name
+
+    if prev_save == '':
+        return True
+    elif prev_save == doctor and current_save == doctor:
+        return False
 
 def win_check():
     dead_mafia = 0
@@ -280,12 +295,14 @@ def save_phase():
 
 @socketio.on('save')
 def save(message):
-    global activity
+    global activity, current_save
     for i in players:
         if i.role =='doctor' and i.status == 'active':
             activity['save'] = message['name']
         else:
             activity['save'] = ''
+    
+    current_save = message['name']
 
 @socketio.on('save check')
 def save_check(message):
@@ -296,9 +313,11 @@ def save_check(message):
             doctor_alive = False
     
     if doctor_alive:
-        for i in players:
-            if i.name == target and i.status=='active':
-                emit('enter save phase', {"name": i.name}, room=gamekey)
+        check = self_save_check()
+        if check:
+            for i in players:
+                if i.name == target and i.status=='active':
+                    emit('enter save phase', {"name": i.name}, room=gamekey)
     else:
         emit('enter save phase', {"name": ''}, room=gamekey)
 
@@ -312,7 +331,7 @@ def detect_phase():
 
 @socketio.on('detect')
 def detect(message):
-    global players
+    global players, current_save, prev_save
     role = ''
     person_to_check = message['name']
     for i in players:
@@ -328,6 +347,8 @@ def detect(message):
                 }, 
                 room=i.sid)
             break
+    
+    prev_save = current_save
 
 @socketio.on('detect check')
 def detect_check(message):
