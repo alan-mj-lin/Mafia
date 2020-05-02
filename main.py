@@ -44,7 +44,7 @@ LOG = '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
                 </div>\
             </div>\
         </div>'
-WATCHER_LOG = ''
+WATCHER_LOG = LOG
 SCREEN_TEXT = ['', '']
 
 def generateGameRoomKey(length=8):
