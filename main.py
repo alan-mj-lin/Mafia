@@ -128,8 +128,6 @@ def reset():
     WATCHER_LOG = LOG
     current_save = ''
     prev_save = ''
-    emit('clear storage', room=gamekey)
-    emit('clear storage', room='watcher')
 
 
 @app.route('/', methods=['GET', 'POST'])
