@@ -144,6 +144,11 @@ def watcher_message(msg):
     WATCHER_LOG += text
     emit('update log', {'data': WATCHER_LOG}, room='watcher')
 
+@socketio.on('join gamekey')
+def join_gamekey():
+    global gamekey
+    join_room(gamekey)
+
 @socketio.on('add player')
 def add_player(message):
     global gamekey
@@ -151,7 +156,6 @@ def add_player(message):
     print(sid)
     player = Player(message['name'], sid)
     players.append(player)
-    join_room(gamekey)
     emit('add event listeners', {"name": player.name}, room=gamekey)
 
 @socketio.on('clear')

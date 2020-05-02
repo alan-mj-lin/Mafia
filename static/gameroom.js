@@ -237,6 +237,7 @@ $(document).ready(function() {
         })
         if (!duplicate){
             $('#modal').modal('hide');
+            socket.emit('join gamekey');
             socket.emit('board entry', {data: temp});
             socket.emit('add player', {name: $('#name').val()});
         } else {
