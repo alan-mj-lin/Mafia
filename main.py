@@ -221,8 +221,8 @@ def shuffle():
 @socketio.on('show screen')
 def show_screen(msg):
     global SCREEN_TEXT
-    SCREEN_TEXT[0] = msg.title
-    SCREEN_TEXT[1] = msg.subtitle
+    SCREEN_TEXT[0] = msg['title']
+    SCREEN_TEXT[1] = msg['subtitle']
     emit('show', {'title': SCREEN_TEXT[0], 'subtitle': SCREEN_TEXT[1]}, room=gamekey)
 
 @socketio.on('disable start')
