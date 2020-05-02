@@ -302,6 +302,7 @@ def kill_check(message):
     cheat = False
     for i in players:
         if i.role == 'mafia' and i.sid == request.sid:
+            print(i.role, i.sid, request.sid)
             cheat = False
         else:
             cheat = True
