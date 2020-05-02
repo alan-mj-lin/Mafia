@@ -299,10 +299,17 @@ def hang_and_win_check(message):
 
 @socketio.on('kill check')
 def kill_check(message):
-    target = message['target']
+    cheat = False
     for i in players:
-        if i.name == target and i.status=='active':
-            emit('enter kill phase', {"name": i.name}, room=gamekey)
+        if i.role == 'mafia' and i.sid == request.sid:
+            cheat = False
+        else:
+            cheat = True
+    if not cheat:
+        target = message['target']
+        for i in players:
+            if i.name == target and i.status=='active':
+                emit('enter kill phase', {"name": i.name}, room=gamekey)
 
 @socketio.on('save phase')
 def save_phase():
