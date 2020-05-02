@@ -109,6 +109,29 @@ def win_check():
         emit('disable all', room='watcher')
 
 
+def reset():
+    global gamekey, players, numMafia, roles, BOARD_HTML, LOG, WATCHER_LOG, current_save, prev_save
+    gamekey = 'ffffffff'
+    players = []
+    numMafia = 0
+    roles = []
+    BOARD_HTML = ''
+    LOG = '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
+            <div class="media">\
+                <img class="mr-3" src="static/spyicon.jpg" alt="Generic placeholder image">\
+                <div class="media-body">\
+                <h5 class="mt-0">Pre-Game</h5>\
+                Waiting for players....\
+                </div>\
+            </div>\
+        </div>'
+    WATCHER_LOG = LOG
+    current_save = ''
+    prev_save = ''
+    emit('clear storage', room=gamekey)
+    emit('clear storage', room='watcher')
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     return render_template("index.html")
@@ -116,6 +139,7 @@ def home():
 @app.route('/process', methods=['POST'])
 def process():
     global numMafia, gamekey
+    reset()
     numMafia = int(request.form['mafia'])
     print(numMafia)
     gamekey = generateGameRoomKey()
@@ -195,26 +219,7 @@ def add_player(message):
 
 @socketio.on('clear')
 def clear():
-    global gamekey, players, numMafia, roles, BOARD_HTML, LOG, WATCHER_LOG, current_save, prev_save
-    gamekey = 'ffffffff'
-    players = []
-    numMafia = 0
-    roles = []
-    BOARD_HTML = ''
-    LOG = '<div class="overflow-auto p-3 mb-3 mb-md-0 mr-md-3 bg-light">\
-            <div class="media">\
-                <img class="mr-3" src="static/spyicon.jpg" alt="Generic placeholder image">\
-                <div class="media-body">\
-                <h5 class="mt-0">Pre-Game</h5>\
-                Waiting for players....\
-                </div>\
-            </div>\
-        </div>'
-    WATCHER_LOG = LOG
-    current_save = ''
-    prev_save = ''
-    emit('clear storage', room=gamekey)
-    emit('clear storage', room='watcher')
+    reset()
 
 @socketio.on('shuffle')
 def shuffle():
