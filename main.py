@@ -62,6 +62,8 @@ def win_check():
 
     if dead_mafia == numMafia:
         emit('result', {"winners": 'town'}, room=sid)
+        emit('disable all', room=gamekey)
+        emit('disable all', room='watcher')
 
     # check for living people in the town
     for i in players:
@@ -72,6 +74,8 @@ def win_check():
         print(civilians)
         print(numMafia - dead_mafia)
         emit('result', {"winners": 'mafia'}, room=sid)
+        emit('disable all', room=gamekey)
+        emit('disable all', room='watcher')
 
 
 @app.route('/', methods=['GET', 'POST'])
