@@ -307,7 +307,9 @@ def kill_check(message):
             print(not cheat)
             cheat = False
             break
-        
+        else:
+            cheat = True
+
     if not cheat:
         target = message['target']
         for i in players:
