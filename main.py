@@ -181,7 +181,7 @@ def add_player(message):
 
 @socketio.on('clear')
 def clear():
-    global gamekey, players, numMafia, roles, BOARD_HTML, LOG, WATCHER_LOG
+    global gamekey, players, numMafia, roles, BOARD_HTML, LOG, WATCHER_LOG, current_save, prev_save
     gamekey = 'ffffffff'
     players = []
     numMafia = 0
@@ -297,19 +297,19 @@ def save_phase():
 
 @socketio.on('save')
 def save(message):
-    global activity, current_save
+    global activity
     for i in players:
         if i.role =='doctor' and i.status == 'active':
             activity['save'] = message['name']
         else:
             activity['save'] = ''
-    
-    current_save = message['name']
 
 @socketio.on('save check')
 def save_check(message):
+    global current_save
     target = message['target']
     doctor_alive = True
+    current_save = target
     for i in players:
         if i.role =='doctor' and i.status == 'dead':
             doctor_alive = False
