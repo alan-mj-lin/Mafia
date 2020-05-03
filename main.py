@@ -352,8 +352,8 @@ def save(message):
     for i in players:
         if i.role =='doctor' and i.status == 'active':
             activity['save'] = message['name']
-        else:
-            activity['save'] = ''
+            print(i.role, i.status)
+    print(activity['save'])
 
 @socketio.on('save check')
 def save_check(message):
