@@ -138,13 +138,12 @@ def home():
 
 @app.route('/process', methods=['POST'])
 def process():
-    global numMafia, gamekey, narrator_sid
+    global numMafia, gamekey
     reset()
     numMafia = int(request.form['mafia'])
     print(numMafia)
     gamekey = generateGameRoomKey()
-    if narrator_sid != '':
-        return jsonify({'redirect': gamekey})
+    return jsonify({'redirect': gamekey})
 
 @app.route('/getkey', methods=['GET'])
 def getkey():
@@ -170,6 +169,12 @@ def connect_test():
     """
     emit('get name')
 
+@socketio.on('start check')
+def start_check():
+    global narrator_sid
+    if narrator_sid != '':
+        emit('start', room=request.sid)
+
 @socketio.on('sync users')
 def sync_users():
     emit('update board', {"board": BOARD_HTML})
@@ -184,9 +189,9 @@ def sync_board(msg):
 
 @socketio.on('observe')
 def observe():
-    global WATCHER_LOG
+    global WATCHER_LOG, narrator_sid
+    narrator_sid=request.sid
     join_room('watcher')
-    narrator_sid = request.sid
     emit('update log', {'data': WATCHER_LOG}, room='watcher')
 
 @socketio.on('message')

@@ -204,6 +204,14 @@ $(document).ready(function() {
         sessionStorage.clear();
     });
 
+    socket.on('start', function(){
+        addMessage('Shuffling Roles', 'Randomly assign everyone a role', socket);
+        socket.emit('shuffle');
+        addMessage('Start', 'Game started! The hunt begins..', socket);
+        socket.emit('disable start');
+        nightProgression(socket);
+    });
+
     $('#enter').click(function(){
         var Name = $('#name').val();
         var duplicate = false;
@@ -272,12 +280,8 @@ $(document).ready(function() {
         socket.emit('observe');
     })
 
-    $('#start').on('click', function() {       
-        addMessage('Shuffling Roles', 'Randomly assign everyone a role', socket);
-        socket.emit('shuffle');
-        addMessage('Start', 'Game started! The hunt begins..', socket);
-        socket.emit('disable start');
-        nightProgression(socket);
+    $('#start').on('click', function() {  
+        socket.emit('start check');
     });
 
     $('#night').click(function() {
