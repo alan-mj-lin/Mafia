@@ -49,7 +49,7 @@ SCREEN_TEXT = ['', '']
 
 current_save = ''
 prev_save = ''
-narrator_sid = ''
+narrator_sid = []
 
 
 def generateGameRoomKey(length=8):
@@ -112,8 +112,9 @@ def win_check():
 
 
 def reset():
-    global gamekey, players, numMafia, roles, BOARD_HTML, LOG, WATCHER_LOG, current_save, prev_save
+    global gamekey, players, numMafia, roles, BOARD_HTML, LOG, WATCHER_LOG, current_save, prev_save, narrator_sid
     gamekey = 'ffffffff'
+    narrator_sid = []
     players = []
     numMafia = 0
     roles = []
@@ -172,7 +173,7 @@ def connect_test():
 @socketio.on('start check')
 def start_check():
     global narrator_sid
-    if narrator_sid != '':
+    if narrator_sid:
         emit('start', room=request.sid)
 
 @socketio.on('sync users')
@@ -190,7 +191,7 @@ def sync_board(msg):
 @socketio.on('observe')
 def observe():
     global WATCHER_LOG, narrator_sid
-    narrator_sid=request.sid
+    narrator_sid.append(request.sid)
     join_room('watcher')
     emit('update log', {'data': WATCHER_LOG}, room='watcher')
 
