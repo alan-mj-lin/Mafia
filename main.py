@@ -49,6 +49,8 @@ SCREEN_TEXT = ['', '']
 
 current_save = ''
 prev_save = ''
+narrator_sid = ''
+
 
 def generateGameRoomKey(length=8):
     letters = string.ascii_letters
@@ -136,12 +138,13 @@ def home():
 
 @app.route('/process', methods=['POST'])
 def process():
-    global numMafia, gamekey
+    global numMafia, gamekey, narrator_sid
     reset()
     numMafia = int(request.form['mafia'])
     print(numMafia)
     gamekey = generateGameRoomKey()
-    return jsonify({'redirect': gamekey})
+    if narrator_sid != '':
+        return jsonify({'redirect': gamekey})
 
 @app.route('/getkey', methods=['GET'])
 def getkey():
@@ -183,6 +186,7 @@ def sync_board(msg):
 def observe():
     global WATCHER_LOG
     join_room('watcher')
+    narrator_sid = request.sid
     emit('update log', {'data': WATCHER_LOG}, room='watcher')
 
 @socketio.on('message')
