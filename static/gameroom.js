@@ -212,9 +212,8 @@ $(document).ready(function() {
         nightProgression(socket);
     });
 
-    $('#enter').click(function(){
-        var Name = $('#name').val();
-        var duplicate = false;
+    socket.on('player entry', function(msg){
+        const Name = msg.name;
         var temp = '<div class="card" id="' +Name+'" style="width: 18rem;">\
                         <img src="static/spyicon.png" class="card-img-top" alt="...">\
                         <div class="card-body">\
@@ -227,20 +226,20 @@ $(document).ready(function() {
                             <a name="hang" id="'+Name+'_hang" class="btn btn-secondary disabled">Hang</a>\
                         </div>\
                     </div>'
-        $('.card').each(function(){
-            if ($(this).attr("id") == Name) {
-                console.log($(this).attr("id"));
-                duplicate = true;
-            }
-        })
-        if (!duplicate){
-            $('#modal').modal('hide');
-            socket.emit('join gamekey');
-            socket.emit('board entry', {data: temp});
-            socket.emit('add player', {name: $('#name').val()});
-        } else {
-            $('.alert').show();
-        }
+        $('#modal').modal('hide');
+        socket.emit('join gamekey');
+        socket.emit('board entry', {data: temp});
+        socket.emit('add player', {name: Name});
+    });
+
+    socket.on('entry error', function(){
+        $('.alert').show();
+    });
+
+    $('#enter').click(function(){
+        var Name = $('#name').val();
+        socket.emit('name check', {data: Name});
+        
     });
 
     $(document).on("click", "a[name='kill']", function(){

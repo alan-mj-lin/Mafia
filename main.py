@@ -180,6 +180,19 @@ def start_check():
 def sync_users():
     emit('update board', {"board": BOARD_HTML})
 
+@socketio.on('name check')
+def name_check(msg):
+    global players
+    duplicate = False
+    for i in players:
+        if msg['data'] == i.name:
+            duplicate = True
+    
+    if not duplicate:
+        emit('player entry', {'name': msg['data']})
+    else:
+        emit('entry error')
+
 @socketio.on('board entry')
 def sync_board(msg):
     global BOARD_HTML
