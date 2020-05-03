@@ -183,12 +183,15 @@ def sync_users():
 @socketio.on('name check')
 def name_check(msg):
     global players
-    duplicate = False
+    invalid = False
     for i in players:
         if msg['data'] == i.name:
-            duplicate = True
+            invalid = True
+    for i in msg['data']:
+        if i==' ':
+            invalid = True
     
-    if not duplicate:
+    if not invalid:
         emit('player entry', {'name': msg['data']})
     else:
         emit('entry error')
