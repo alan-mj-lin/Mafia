@@ -1,0 +1,34 @@
+{
+    "rooms": [
+        {
+            "id": "0001",
+            "players": [
+                {
+                    "name": "alan",
+                    "userId": "12354",
+                    "role": "civilian",
+                    "status": "alive"
+                },
+                {
+                    "name": "noob",
+                    "userId": "42314",
+                    "role": "civilian",
+                    "status": "alive"
+                },
+                {
+                    "name": "mafia-pro",
+                    "userId": "12345345354",
+                    "role": "civilian",
+                    "status": "alive"
+                },
+                {
+                    "name": "not-fun",
+                    "userId": "1123122354",
+                    "role": "mafia",
+                    "status": "alive"
+                }
+            ],
+            "status": "pre-game"
+        }
+    ]
+}
