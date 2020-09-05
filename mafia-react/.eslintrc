@@ -1,0 +1,33 @@
+{
+    "extends": [
+        "plugin:react/recommended",
+        "airbnb-typescript",
+        "airbnb/hooks",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        // "plugin:node/recommended",
+        "prettier/@typescript-eslint",
+        "plugin:prettier/recommended"
+    ],
+    "plugins": ["prettier"],
+    "rules": {
+        "prettier/prettier": "error",
+        "func-names": "off",
+        "no-unused-vars": "warn",
+        "no-console": "off",
+        "no-var-requires": "off",
+        "no-process-exit": "off",
+        "no-param-reassign": "off",
+        "object-shorthand": "off",
+        "class-methods-use-this": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "no-unused-expressions": "off",
+        "@typescript-eslint/no-unused-expressions": "error"
+    },
+    "parserOptions": {
+        "project": "./tsconfig.json"
+    }
+}

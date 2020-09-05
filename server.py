@@ -5,9 +5,6 @@ This is the main file to run.
 import json
 from flask import Flask, request, make_response
 
-with open('database.json') as file:
-    data = json.load(file)
-
 app = Flask(__name__)
 
 def build_preflight_response():
@@ -26,6 +23,8 @@ def build_actual_response(json):
 # will only return json for a particular room
 @app.route('/room', methods=['GET', 'OPTIONS'])
 def get_room_json():
+    with open('database.json') as file:
+        data = json.load(file)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'GET':

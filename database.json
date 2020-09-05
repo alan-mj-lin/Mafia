@@ -26,9 +26,32 @@
                     "userId": "1123122354",
                     "role": "mafia",
                     "status": "alive"
+                },
+                {
+                    "name": "not-cool",
+                    "userId": "1123122354",
+                    "role": "mafia",
+                    "status": "alive"
+                },
+                {
+                    "name": "fun",
+                    "userId": "1123122354",
+                    "role": "mafia",
+                    "status": "alive"
                 }
             ],
-            "status": "pre-game"
+            "status": "pre-game",
+            "gameMessages": [
+                {
+                    "message": "Waiting for players"
+                }
+            ],
+            "observerMessages": [
+                {
+                    "message": "Waiting for players"
+                }
+            ]
+            
         }
     ]
 }
