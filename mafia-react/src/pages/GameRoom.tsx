@@ -1,12 +1,23 @@
 import React from "react";
 import { useParams, Redirect } from 'react-router-dom';
+
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
+import Slide from '@material-ui/core/Slide';
+import useScrollTrigger from '@material-ui/core/useScrollTrigger';
+
 import { useQuery } from 'react-query';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 import { PlayerCard } from '../components/PlayerCard';
+import { MessageSideBar } from '../components/MessageSideBar';
+
 import { API_URL } from '../var/env';
 
 interface RouteParams {
@@ -20,7 +31,30 @@ interface PlayerType {
     userId: string;
 }
 
-export const GameRoom = () => {
+interface Props {
+    /**
+     * Injected by the documentation to work in an iframe.
+     * You won't need it on your project.
+     */
+    window?: () => Window;
+    children: React.ReactElement;
+}
+
+function HideOnScroll(props: Props) {
+    const { children, window } = props;
+    // Note that you normally won't need to set the window ref as useScrollTrigger
+    // will default to window.
+    // This is only being set here because the demo is in an iframe.
+    const trigger = useScrollTrigger({ target: window ? window() : undefined });
+  
+    return (
+      <Slide appear={false} direction="up" in={!trigger}>
+        {children}
+      </Slide>
+    );
+}
+
+export const GameRoom = (props: Props) => {
     const classes = useStyles();
     const params = useParams<RouteParams>();
     const { isLoading, error, data} = useQuery(params.roomId, 
@@ -32,25 +66,46 @@ export const GameRoom = () => {
             refetchInterval: 2000
         }
     )
-    console.log(data?.data);
+    console.log(data?.data.status);
+    console.log(Cookies.get('userId'));
     return (
         <div>
             {error && <Redirect to={{
                 pathname: "/notfound"
             }}/>}
-            {(data?.data.message === "Not Found") && <Redirect to={{
+            {(!isLoading && data?.status !== 200) && <Redirect to={{
                 pathname: "/notfound"
             }}/>}
-            <Typography variant="h2">Game Room</Typography>
-            <Grid container className={classes.root} spacing={2}>
-                {data?.data.players.map((player: any) => {
-                    return (
-                        <Grid item>
-                            <PlayerCard name={player.name} role={player.role} status={player.status} />
-                        </Grid>
-                    )
-                })}
-            </Grid>
+            {(!isLoading && data?.status ===200) &&
+            <div>
+                <Typography variant="h2">Game Room</Typography>
+                <Grid sm={8} container className={classes.root} spacing={2}>
+                    {data?.data.players.map((player: PlayerType) => {
+                        return (
+                            <Grid item>
+                                <PlayerCard name={player.name} role={
+                                    (player.userId === Cookies.get('userId') || data?.data.status === 'ended') ? player.role : '???'
+                                } status={player.status} />
+                            </Grid>
+                        )
+                    })}
+                </Grid>
+                <MessageSideBar messages={data?.data.gameMessages}/>
+                <HideOnScroll {...props}>
+                    <AppBar position="fixed" color="primary" className={classes.appBar}>
+                        <Toolbar>
+                            <ButtonGroup>
+                                <Button variant="contained">Skip Turn</Button>
+                                <Button variant="contained">Hang</Button>
+                                <Button variant="contained">Start Night</Button>
+                                <Button variant="contained">Start Game</Button>
+                            </ButtonGroup>
+                            {(Cookies.get('userId')) && <h2>{Cookies.get('userId')}</h2>}
+                        </Toolbar>
+                    </AppBar>
+                </HideOnScroll>
+            </div>
+            }           
         </div>
     )
 }
@@ -66,6 +121,10 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     control: {
       padding: theme.spacing(2),
+    },
+    appBar: {
+        top: 'auto',
+        bottom: 0,
     },
   }),
 );
