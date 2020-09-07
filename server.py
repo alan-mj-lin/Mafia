@@ -6,26 +6,42 @@ import json
 import uuid
 import random, string
 from flask import Flask, request
+from apscheduler.schedulers.background import BackgroundScheduler
 from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey
 
 app = Flask(__name__)
 
 
+def set_polling_false():
+    with open('database.json') as file:
+        data = json.load(file)
+
+        for i in data['rooms']:
+            i['polling'] = False
+    
+    write_json(data)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=set_polling_false, trigger="interval", seconds=60)
+scheduler.start()
+
 # will only return json for a particular room
 @app.route('/room', methods=['GET', 'OPTIONS'])
 def get_room_json():
     print(request.cookies)
-    with open('database.json') as file:
-        data = json.load(file)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'GET':
         roomId = request.args.get('roomId')
         roomFound = False
-        for i in data['rooms']:
-            if i['id'] == roomId:
-                roomFound = True
-                return build_actual_response(i, 200)
+        with open('database.json') as file:
+            data = json.load(file)
+            for i in data['rooms']:
+                if i['id'] == roomId:
+                    roomFound = True
+                    i['polling'] = True
+                    write_json(data)
+                    return build_actual_response(i, 200)
         if roomId is None or roomFound is False:
             return build_actual_response({ "message": "Not Found" }, 404)
 
@@ -45,6 +61,8 @@ def create_room():
                 "id": generateGameRoomKey(),
                 "players": [],
                 "status": "pre-game",
+                "phase": "pre-game",
+                "polling": True,
                 "gameMessages": [
                     {
                         "primary": "Waiting for players",

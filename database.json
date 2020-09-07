@@ -44,27 +44,11 @@
                     "userId": "1785face6d8c4bba92dcfde2a6b8a652",
                     "role": "unassigned",
                     "status": "alive"
-                },
-                {
-                    "name": "",
-                    "userId": "628ffb1787ee411da5b1cba6b828d151",
-                    "role": "unassigned",
-                    "status": "alive"
-                },
-                {
-                    "name": "",
-                    "userId": "25f2980ee618434b805f066def5631fc",
-                    "role": "unassigned",
-                    "status": "alive"
-                },
-                {
-                    "name": "",
-                    "userId": "414d6a47470f4674a4f4e9916f38e83b",
-                    "role": "unassigned",
-                    "status": "alive"
                 }
             ],
             "status": "pre-game",
+            "phase": "pre-grame",
+            "polling": false,
             "gameMessages": [
                 {
                     "primary": "Pre-Game",
