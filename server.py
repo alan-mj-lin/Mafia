@@ -8,6 +8,7 @@ import random, string
 from flask import Flask, request
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false
+from database_actions import write_new_room
 
 app = Flask(__name__)
 
@@ -43,34 +44,7 @@ def create_room():
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'POST':
-        with open('database.json') as file:
-            data = json.load(file)
-
-            temp = data['rooms']
-
-            new_room = {
-                "id": generateGameRoomKey(),
-                "numMafia": int(request.form.get('numMafia')),
-                "players": [],
-                "status": "pre-game",
-                "phase": "pre-game",
-                "polling": True,
-                "roomMaster": uuid.uuid4().hex,
-                "gameMessages": [
-                    {
-                        "primary": "Waiting for players",
-                        "secondary": "Waiting for players.."
-                    }
-                ],
-                "observerMessages": [
-                    {
-                        "primary": "Waiting for players",
-                        "secondary": "Waiting for players.."
-                    }
-                ]
-            }
-            temp.append(new_room)
-        write_json(data)
+        new_room = write_new_room(request.form.get('numMafia'))
         return build_actual_response({ 
             "message": "Room created",
             "roomId": new_room['id']  
