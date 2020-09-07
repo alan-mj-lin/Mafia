@@ -95,10 +95,10 @@ export const GameRoom = (props: Props) => {
                     <AppBar position="fixed" color="primary" className={classes.appBar}>
                         <Toolbar>
                             <ButtonGroup>
-                                <Button variant="contained">Skip Turn</Button>
-                                <Button variant="contained">Hang</Button>
-                                <Button variant="contained">Start Night</Button>
-                                <Button variant="contained">Start Game</Button>
+                                <Button variant="contained" disabled={(Cookies.get('userId') !== data?.data.roomMaster)}>Skip Turn</Button>
+                                <Button variant="contained" disabled={(Cookies.get('userId') !== data?.data.roomMaster)}>Hang</Button>
+                                <Button variant="contained" disabled={(Cookies.get('userId') !== data?.data.roomMaster)}>Start Night</Button>
+                                <Button variant="contained" disabled={(Cookies.get('userId') !== data?.data.roomMaster)}>Start Game</Button>
                             </ButtonGroup>
                             {(Cookies.get('userId')) && <h2>{Cookies.get('userId')}</h2>}
                         </Toolbar>

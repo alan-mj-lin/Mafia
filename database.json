@@ -2,6 +2,7 @@
     "rooms": [
         {
             "id": "0001",
+            "numMafia": 3,
             "players": [
                 {
                     "name": "alan",
@@ -49,6 +50,7 @@
             "status": "pre-game",
             "phase": "pre-grame",
             "polling": false,
+            "roomMaster": "somecookievalue",
             "gameMessages": [
                 {
                     "primary": "Pre-Game",
@@ -64,6 +66,27 @@
                 },
                 {
                     "primary": "Night 2",
+                    "secondary": "Waiting for players.."
+                }
+            ],
+            "observerMessages": [
+                {
+                    "primary": "Waiting for players",
+                    "secondary": "Waiting for players.."
+                }
+            ]
+        },
+        {
+            "id": "fvtNdluI",
+            "numMafia": 3,
+            "players": [],
+            "status": "pre-game",
+            "phase": "pre-game",
+            "polling": false,
+            "roomMaster": "8792df34d49c4dd78e0b97883c8ebf02",
+            "gameMessages": [
+                {
+                    "primary": "Waiting for players",
                     "secondary": "Waiting for players.."
                 }
             ],

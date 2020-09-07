@@ -39,6 +39,7 @@ def get_room_json():
 # create a new room object in database.json
 @app.route('/actions/create-room', methods=['POST', 'OPTIONS'])
 def create_room():
+    print(request.form.get('numMafia'))
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'POST':
@@ -49,10 +50,12 @@ def create_room():
 
             new_room = {
                 "id": generateGameRoomKey(),
+                "numMafia": int(request.form.get('numMafia')),
                 "players": [],
                 "status": "pre-game",
                 "phase": "pre-game",
                 "polling": True,
+                "roomMaster": uuid.uuid4().hex,
                 "gameMessages": [
                     {
                         "primary": "Waiting for players",
@@ -71,7 +74,7 @@ def create_room():
         return build_actual_response({ 
             "message": "Room created",
             "roomId": new_room['id']  
-        }, 201)
+        }, 201, setCookie=True, cookie=new_room['roomMaster'])
 
 
 # add player object to room
@@ -108,7 +111,7 @@ def join_room():
 
 # all routes for game actions
 
-@app.route('/game-actions/start', methods=['PATCH', 'OPTIONS'])
-def game_start():
-    # shuffle the roles 
-    # start the first night
+# @app.route('/game-actions/start', methods=['PATCH', 'OPTIONS'])
+# def game_start():
+#     # shuffle the roles 
+#     # start the first night
