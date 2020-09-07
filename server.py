@@ -85,7 +85,33 @@ def join_room():
 
 # all routes for game actions
 
-# @app.route('/game-actions/start', methods=['PATCH', 'OPTIONS'])
-# def game_start():
-#     # shuffle the roles 
-#     # start the first night
+@app.route('/game-actions/start', methods=['PATCH', 'OPTIONS'])
+def game_start():
+    # shuffle the roles and assign them
+    roles = []
+    room_data = None
+    with open('database.json') as file:
+        data = json.load(file)
+
+        for i in data['rooms']:
+            if i['id'] == request.form.get('roomId'):
+                room_data = i
+
+        for i in range(0, room_data['numMafia']):
+            roles.append('mafia')
+        
+        roles.append('doctor')
+
+        roles.append('detective')
+
+        civilians = len(room_data['players']) - room_data['numMafia'] - 2
+        for i in range(0, civilians):
+            roles.append('civilian')
+        
+        random.shuffle(roles)
+        count = 0
+        for i in room_data['players']:
+            i['role'] = roles[count]
+            count += 1
+
+    # start the first night

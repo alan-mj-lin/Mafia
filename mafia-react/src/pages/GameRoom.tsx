@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, Redirect } from 'react-router-dom';
 
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
@@ -60,17 +60,18 @@ export const GameRoom = (props: Props) => {
     const { isLoading, error, data} = useQuery(params.roomId, 
         async () => {
             const room =  await axios.get(`${API_URL}/room?roomId=${params.roomId}`)
+            
+            console.log(room)
             return room;
         },
         {
             refetchInterval: 2000
         }
     )
-    console.log(data?.data.status);
-    console.log(Cookies.get('userId'));
+
     return (
         <div>
-            {error && <Redirect to={{
+            {(error) && <Redirect to={{
                 pathname: "/notfound"
             }}/>}
             {(!isLoading && data?.status !== 200) && <Redirect to={{
@@ -81,10 +82,11 @@ export const GameRoom = (props: Props) => {
                 <Typography variant="h2">Game Room</Typography>
                 <Grid sm={8} container className={classes.root} spacing={2}>
                     {data?.data.players.map((player: PlayerType) => {
+                        const playerData = data?.data.players.find((player: PlayerType)=> player.userId === Cookies.get('userId'));
                         return (
                             <Grid item>
                                 <PlayerCard name={player.name} role={
-                                    (player.userId === Cookies.get('userId') || data?.data.status === 'ended') ? player.role : '???'
+                                    (player.userId === Cookies.get('userId') || (playerData.role === 'mafia' && player.role === 'mafia') || data?.data.status === 'ended') ? player.role : '???'
                                 } status={player.status} />
                             </Grid>
                         )
