@@ -17,6 +17,7 @@ export const StartPage = () => {
     const history = useHistory();
     const [displayName, setDisplayName] = useState<string>("");
     const [roomId, setRoomId] = useState<string>("");
+    const [mafiaNum, setMafiaNum] = useState<string>("3");
 
     return(
         <Container maxWidth="sm">
@@ -24,6 +25,7 @@ export const StartPage = () => {
             <form className={classes.root} noValidate autoComplete="off">
                 <TextField id="gamename" onChange={(event) => {setDisplayName(event.target.value)}} label="Display Name" />
                 <TextField id="room" onChange={(event) => {setRoomId(event.target.value); console.log(roomId)}} label="Room ID" />
+                <TextField id="mafia" value={mafiaNum} onChange={(event) => {setMafiaNum(event.target.value)}} label="Number of Mafia" /><br/>
                 <Button variant="contained" color="primary" onClick={async () => {
                   await axios.post(`${API_URL}/actions/join-room`, stringify({
                     roomId: roomId,

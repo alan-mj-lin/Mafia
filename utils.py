@@ -33,3 +33,13 @@ def write_json(data, filename='database.json'):
 def generateGameRoomKey(length=8):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for i in range(length))
+
+
+def set_polling_false():
+    with open('database.json') as file:
+        data = json.load(file)
+
+        for i in data['rooms']:
+            i['polling'] = False
+    
+    write_json(data)

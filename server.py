@@ -7,19 +7,9 @@ import uuid
 import random, string
 from flask import Flask, request
 from apscheduler.schedulers.background import BackgroundScheduler
-from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey
+from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false
 
 app = Flask(__name__)
-
-
-def set_polling_false():
-    with open('database.json') as file:
-        data = json.load(file)
-
-        for i in data['rooms']:
-            i['polling'] = False
-    
-    write_json(data)
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=set_polling_false, trigger="interval", seconds=60)
@@ -115,3 +105,10 @@ def join_room():
                 return build_actual_response({"message": "Not Found"}, 404)
         write_json(data)
         return build_actual_response({ "message": "Player created" }, 201, setCookie=True, cookie=new_player['userId'])
+
+# all routes for game actions
+
+@app.route('/game-actions/start', methods=['PATCH', 'OPTIONS'])
+def game_start():
+    # shuffle the roles 
+    # start the first night
