@@ -49,7 +49,7 @@
             ],
             "status": "pre-game",
             "phase": "pre-grame",
-            "polling": false,
+            "polling": true,
             "roomMaster": "somecookievalue",
             "gameMessages": [
                 {

@@ -57,6 +57,7 @@ def join_room():
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'POST':
+        userId = request.cookies.get('userId')
         roomId = request.form['roomId']
         print(request.form['roomId'])
         isValidRoom = False
@@ -77,6 +78,9 @@ def join_room():
                     isValidRoom = True
                     temp = i
             if isValidRoom:
+                for i in temp['players']:
+                    if i['userId'] == userId:
+                        return build_actual_response({ "message": "Player reconnected"}, 200)
                 temp['players'].append(new_player)
             else:
                 return build_actual_response({"message": "Not Found"}, 404)

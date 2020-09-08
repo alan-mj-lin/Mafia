@@ -86,7 +86,7 @@ export const GameRoom = (props: Props) => {
                         return (
                             <Grid item>
                                 <PlayerCard name={player.name} role={
-                                    (player.userId === Cookies.get('userId') || (playerData.role === 'mafia' && player.role === 'mafia') || data?.data.status === 'ended') ? player.role : '???'
+                                    (player.userId === Cookies.get('userId') || (playerData !== undefined && playerData.role === 'mafia' && player.role === 'mafia') || data?.data.status === 'ended') ? player.role : '???'
                                 } status={player.status} />
                             </Grid>
                         )
