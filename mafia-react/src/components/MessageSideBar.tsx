@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -13,43 +13,40 @@ import spyicon from '../images/spyicon.png';
 const drawerWidth = 500;
 
 interface MessageType {
-    primary: string;
-    secondary: string;
+  primary: string;
+  secondary: string;
 }
 
 export interface MessageSideBarProps {
-    messages: MessageType[];
+  messages: MessageType[];
 }
 
-export const MessageSideBar = ({messages}: MessageSideBarProps) => {
-    const classes = useStyles();
-    return (
-        <Drawer
-            className={classes.drawer}
-            variant="permanent"
-            classes={{
-            paper: classes.drawerPaper,
-            }}
-            anchor="right"
-        >
-            <List>
-                {messages.map((message) => {
-                    return(
-                        <ListItem>
-                            <ListItemAvatar>
-                                <Avatar src={spyicon} />
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={message.primary}
-                                secondary={message.secondary}
-                            />
-                        </ListItem>
-                    )
-                })}
-            </List>
-        </Drawer>
-    )
-}
+export const MessageSideBar = ({ messages }: MessageSideBarProps) => {
+  const classes = useStyles();
+  return (
+    <Drawer
+      className={classes.drawer}
+      variant="permanent"
+      classes={{
+        paper: classes.drawerPaper,
+      }}
+      anchor="right"
+    >
+      <List>
+        {messages.map((message) => {
+          return (
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar src={spyicon} />
+              </ListItemAvatar>
+              <ListItemText primary={message.primary} secondary={message.secondary} />
+            </ListItem>
+          );
+        })}
+      </List>
+    </Drawer>
+  );
+};
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -64,11 +61,11 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(2),
     },
     drawer: {
-        width: drawerWidth,
-        flexShrink: 0,
+      width: drawerWidth,
+      flexShrink: 0,
     },
     drawerPaper: {
-    width: drawerWidth,
+      width: drawerWidth,
     },
   }),
 );

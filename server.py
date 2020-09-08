@@ -4,7 +4,8 @@ This is the main file to run.
 """
 import json
 import uuid
-import random, string
+import random
+import string
 from flask import Flask, request
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false
@@ -17,6 +18,8 @@ scheduler.add_job(func=set_polling_false, trigger="interval", seconds=60)
 scheduler.start()
 
 # will only return json for a particular room
+
+
 @app.route('/room', methods=['GET', 'OPTIONS'])
 def get_room_json():
     print(request.cookies)
@@ -34,7 +37,7 @@ def get_room_json():
                     write_json(data)
                     return build_actual_response(i, 200)
         if roomId is None or roomFound is False:
-            return build_actual_response({ "message": "Not Found" }, 404)
+            return build_actual_response({"message": "Not Found"}, 404)
 
 
 # create a new room object in database.json
@@ -45,9 +48,9 @@ def create_room():
         return build_preflight_response()
     elif request.method == 'POST':
         new_room = write_new_room(request.form.get('numMafia'))
-        return build_actual_response({ 
+        return build_actual_response({
             "message": "Room created",
-            "roomId": new_room['id']  
+            "roomId": new_room['id']
         }, 201, setCookie=True, cookie=new_room['roomMaster'])
 
 
@@ -80,42 +83,48 @@ def join_room():
             if isValidRoom:
                 for i in temp['players']:
                     if i['userId'] == userId:
-                        return build_actual_response({ "message": "Player reconnected"}, 200)
+                        return build_actual_response({"message": "Player reconnected"}, 200)
                 temp['players'].append(new_player)
             else:
                 return build_actual_response({"message": "Not Found"}, 404)
         write_json(data)
-        return build_actual_response({ "message": "Player created" }, 201, setCookie=True, cookie=new_player['userId'])
+        return build_actual_response({"message": "Player created"}, 201, setCookie=True, cookie=new_player['userId'])
 
 # all routes for game actions
 
+
 @app.route('/game-actions/start', methods=['PATCH', 'OPTIONS'])
 def game_start():
-    # shuffle the roles and assign them
-    roles = []
-    room_data = None
-    with open('database.json') as file:
-        data = json.load(file)
+    if request.method == 'OPTIONS':
+        return build_preflight_response()
+    elif request.method == 'PATCH':
+        # shuffle the roles and assign them
+        roles = []
+        room_data = None
+        with open('database.json') as file:
+            data = json.load(file)
 
-        for i in data['rooms']:
-            if i['id'] == request.form.get('roomId'):
-                room_data = i
+            for i in data['rooms']:
+                if i['id'] == request.form.get('roomId'):
+                    room_data = i
 
-        for i in range(0, room_data['numMafia']):
-            roles.append('mafia')
-        
-        roles.append('doctor')
+            for i in range(0, room_data['numMafia']):
+                roles.append('mafia')
 
-        roles.append('detective')
+            roles.append('doctor')
 
-        civilians = len(room_data['players']) - room_data['numMafia'] - 2
-        for i in range(0, civilians):
-            roles.append('civilian')
-        
-        random.shuffle(roles)
-        count = 0
-        for i in room_data['players']:
-            i['role'] = roles[count]
-            count += 1
+            roles.append('detective')
 
+            civilians = len(room_data['players']) - room_data['numMafia'] - 2
+            for i in range(0, civilians):
+                roles.append('civilian')
+
+            random.shuffle(roles)
+            count = 0
+            for i in room_data['players']:
+                i['role'] = roles[count]
+                count += 1
+
+        write_json(data)
+        return build_actual_response({"message": "Player roles shuffled"}, 200)
     # start the first night

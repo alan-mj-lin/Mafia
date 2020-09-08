@@ -13,19 +13,19 @@
                 {
                     "name": "noob",
                     "userId": "42314",
-                    "role": "civilian",
+                    "role": "mafia",
                     "status": "alive"
                 },
                 {
                     "name": "mafia-pro",
                     "userId": "12345345354",
-                    "role": "civilian",
+                    "role": "detective",
                     "status": "alive"
                 },
                 {
                     "name": "not-fun",
                     "userId": "1123122354",
-                    "role": "mafia",
+                    "role": "doctor",
                     "status": "alive"
                 },
                 {
@@ -43,14 +43,14 @@
                 {
                     "name": "cool",
                     "userId": "1785face6d8c4bba92dcfde2a6b8a652",
-                    "role": "unassigned",
+                    "role": "civilian",
                     "status": "alive"
                 }
             ],
             "status": "pre-game",
             "phase": "pre-grame",
             "polling": true,
-            "roomMaster": "somecookievalue",
+            "roomMaster": "8cb2f60fdff14d5ea32c16eea39c691f",
             "gameMessages": [
                 {
                     "primary": "Pre-Game",
@@ -79,7 +79,14 @@
         {
             "id": "fvtNdluI",
             "numMafia": 3,
-            "players": [],
+            "players": [
+                {
+                    "name": "yo",
+                    "userId": "7ff7ba80d3ff41999072effd7aa1d232",
+                    "role": "unassigned",
+                    "status": "alive"
+                }
+            ],
             "status": "pre-game",
             "phase": "pre-game",
             "polling": false,
