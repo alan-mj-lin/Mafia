@@ -19,6 +19,8 @@ import { stringify } from 'querystring';
 import { PlayerCard } from '../components/PlayerCard';
 import { MessageSideBar } from '../components/MessageSideBar';
 
+import { gameStart, killRequest } from '../api/';
+
 import { API_URL } from '../var/env';
 
 interface RouteParams {
@@ -61,7 +63,9 @@ export const GameRoom = (props: Props) => {
   const { isLoading, error, data } = useQuery(
     params.roomId,
     async () => {
-      const room = await axios.get(`${API_URL}/room?roomId=${params.roomId}`);
+      const room = await axios.get(`${API_URL}/room?roomId=${params.roomId}`, {
+        withCredentials: true,
+      });
 
       console.log(room);
       return room;
@@ -110,6 +114,8 @@ export const GameRoom = (props: Props) => {
                         : '???'
                     }
                     status={player.status}
+                    phase={data?.data.phase}
+                    onKill={(event) => killRequest(params.roomId, player.userId)}
                   />
                 </Grid>
               );
@@ -140,15 +146,11 @@ export const GameRoom = (props: Props) => {
                   </Button>
                   <Button
                     variant="contained"
-                    disabled={Cookies.get('userId') !== data?.data.roomMaster}
-                    onClick={async () => {
-                      await axios.patch(
-                        `${API_URL}/game-actions/start`,
-                        stringify({
-                          roomId: params.roomId,
-                        }),
-                      );
-                    }}
+                    disabled={
+                      Cookies.get('userId') !== data?.data.roomMaster ||
+                      data?.data.status !== 'pre-game'
+                    }
+                    onClick={() => gameStart(params.roomId)}
                   >
                     Start Game
                   </Button>

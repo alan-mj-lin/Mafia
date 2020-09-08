@@ -3,12 +3,13 @@
         {
             "id": "0001",
             "numMafia": 3,
+            "night": 2,
             "players": [
                 {
                     "name": "alan",
                     "userId": "12354",
-                    "role": "civilian",
-                    "status": "alive"
+                    "role": "doctor",
+                    "status": "dead"
                 },
                 {
                     "name": "noob",
@@ -19,13 +20,13 @@
                 {
                     "name": "mafia-pro",
                     "userId": "12345345354",
-                    "role": "detective",
+                    "role": "civilian",
                     "status": "alive"
                 },
                 {
                     "name": "not-fun",
                     "userId": "1123122354",
-                    "role": "doctor",
+                    "role": "detective",
                     "status": "alive"
                 },
                 {
@@ -37,18 +38,18 @@
                 {
                     "name": "fun",
                     "userId": "1123122354",
-                    "role": "mafia",
+                    "role": "civilian",
                     "status": "alive"
                 },
                 {
                     "name": "cool",
                     "userId": "1785face6d8c4bba92dcfde2a6b8a652",
-                    "role": "civilian",
+                    "role": "mafia",
                     "status": "alive"
                 }
             ],
-            "status": "pre-game",
-            "phase": "pre-grame",
+            "status": "in-progress",
+            "phase": "doctor",
             "polling": true,
             "roomMaster": "8cb2f60fdff14d5ea32c16eea39c691f",
             "gameMessages": [
@@ -57,22 +58,34 @@
                     "secondary": "Waiting for players.."
                 },
                 {
-                    "primary": "Start",
-                    "secondary": "Waiting for players.."
-                },
-                {
-                    "primary": "Night 1",
-                    "secondary": "Waiting for players.."
+                    "primary": "Game Start",
+                    "secondary": "Room is no longer accepting new players"
                 },
                 {
                     "primary": "Night 2",
-                    "secondary": "Waiting for players.."
+                    "secondary": "The night has begun!"
+                },
+                {
+                    "primary": "Mafia Phase",
+                    "secondary": "Mafia pick someone to kill"
+                },
+                {
+                    "primary": "Doctor Phase",
+                    "secondary": "Doctor pick someone to heal"
                 }
             ],
             "observerMessages": [
                 {
                     "primary": "Waiting for players",
                     "secondary": "Waiting for players.."
+                },
+                {
+                    "primary": "Night 2",
+                    "secondary": "The night has begun!"
+                },
+                {
+                    "primary": "Mafia Action",
+                    "secondary": "cool killed alan"
                 }
             ]
         },

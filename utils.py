@@ -1,16 +1,19 @@
 import json
-import random, string
+import random
+import string
 from flask import make_response
 
 DOMAIN = '127.0.0.1'
 
 CORS = 'http://localhost:3000'
 
+
 def build_preflight_response():
     response = make_response()
     response.headers.add("Access-Control-Allow-Origin", CORS)
     response.headers.add('Access-Control-Allow-Headers', "*")
-    response.headers.add('Access-Control-Allow-Methods', "*")
+    response.headers.add('Access-Control-Allow-Methods', "PATCH, OPTIONS")
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
 
@@ -26,7 +29,7 @@ def build_actual_response(json, status, setCookie=False, cookie=''):
 
 
 def write_json(data, filename='database.json'):
-    with open(filename,'w') as f: 
+    with open(filename, 'w') as f:
         json.dump(data, f, indent=4)
 
 
@@ -41,5 +44,5 @@ def set_polling_false():
 
         for i in data['rooms']:
             i['polling'] = False
-    
+
     write_json(data)
