@@ -14,7 +14,8 @@ from utils import build_preflight_response, build_actual_response, write_json, g
 from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes, phase_shift
 from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Player
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='./mafia-react/build',
+            static_url_path='/')
 
 database = []
 
@@ -39,8 +40,9 @@ scheduler.add_job(func=database_clean_up, args=[database],
                   trigger='interval', seconds=86400)
 scheduler.start()
 
-
 # will only return json for a particular room
+
+
 @app.route('/room', methods=['GET', 'OPTIONS'])
 def get_room_json():
     if request.method == 'OPTIONS':
@@ -234,3 +236,8 @@ def skip_turn(roomId):
         if not valid_phase_shift:
             return build_actual_response({"message": "Not valid phase shift"}, 400)
         return build_actual_response({"message": "Turn skipped"}, 200)
+
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')

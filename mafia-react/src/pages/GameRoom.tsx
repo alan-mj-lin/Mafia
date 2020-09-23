@@ -81,7 +81,7 @@ export const GameRoom = (props: Props) => {
       return room;
     },
     {
-      refetchInterval: 10000,
+      refetchInterval: 2000,
     },
   );
 
