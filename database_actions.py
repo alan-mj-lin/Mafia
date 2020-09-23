@@ -41,6 +41,9 @@ def game_start_write(database, roomId):
     roles = []
     room_data = get_room(database, roomId)
 
+    if len(room_data.players)/2 <= room_data.numMafia:
+        return False
+
     for i in range(0, room_data.numMafia):
         roles.append('mafia')
 
@@ -69,6 +72,8 @@ def game_start_write(database, roomId):
     # observer messages
     room_data.observerMessages.append(
         Message("Night " + str(room_data.night), "The night has begun!"))
+
+    return True
 
 
 def night_start_write(database, roomId):
@@ -299,3 +304,49 @@ def end_votes(database, roomId):
 
     if is_game_over:
         return True
+
+
+def phase_shift(database, roomId):
+    room_data = get_room(database, roomId)
+    if room_data.phase == 'mafia':
+        room_data.phase = 'doctor'
+        room_data.gameMessages.append(
+            Message('Doctor Phase', 'Doctor pick someone to heal'))
+        return True
+    elif room_data.phase == 'doctor':
+        room_data.phase = 'detective'
+        room_data.gameMessages.append(
+            Message('Detective Phase', 'Detective pick someone to check'))
+        return True
+    elif room_data.phase == 'detective':
+        deathId = None
+
+        if room_data.targets.killTarget != room_data.targets.healTarget:
+            deathId = room_data.targets.killTarget
+
+        # evaluate death
+        for i in room_data.players:
+            if i.userId == deathId:
+                i.status = 'dead'
+                room_data.gameMessages.append(
+                    Message('Night End', i.name + ' was killed'))
+        if deathId is None:
+            room_data.gameMessages.append(
+                Message('Night End', 'The victim was healed'))
+
+        # evaluate win
+        players_left = sum(
+            players.status == 'alive' for players in room_data.players)
+
+        mafia_left = sum(players.status == 'alive' and players.role ==
+                         'mafia' for players in room_data.players)
+
+        is_game_over = evaluate_win(room_data, players_left, mafia_left)
+        if is_game_over:
+            return True
+        room_data.targets = Targets('', '', '')
+        room_data.phase = 'voting'
+        room_data.gameMessages.append(
+            Message('Voting Phase', 'The night is over! Who is the mafia?'))
+        return True
+    return False

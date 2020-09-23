@@ -3,7 +3,7 @@ import { stringify } from 'querystring';
 import { API_URL } from '../var/env';
 
 export function gameStart(roomId: string): Promise<AxiosResponse> {
-  return axios.patch(`${API_URL}/room/${roomId}/start`);
+  return axios.patch(`${API_URL}/room/${roomId}/start`, null, { withCredentials: true });
 }
 
 export function nightStart(roomId: string): Promise<AxiosResponse> {
@@ -44,4 +44,8 @@ export function voteRequest(roomId: string, targetId: string): Promise<AxiosResp
 
 export function endVotesRequest(roomId: string): Promise<AxiosResponse> {
   return axios.patch(`${API_URL}/room/${roomId}/hang`, null, { withCredentials: true });
+}
+
+export function skipTurnRequest(roomId: string): Promise<AxiosResponse> {
+  return axios.patch(`${API_URL}/room/${roomId}/skip`, null, { withCredentials: true });
 }

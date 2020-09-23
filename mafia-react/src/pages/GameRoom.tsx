@@ -27,6 +27,7 @@ import {
   checkRequest,
   voteRequest,
   endVotesRequest,
+  skipTurnRequest,
 } from '../api/';
 
 import { API_URL } from '../var/env';
@@ -80,7 +81,7 @@ export const GameRoom = (props: Props) => {
       return room;
     },
     {
-      refetchInterval: 2000,
+      refetchInterval: 10000,
     },
   );
 
@@ -143,6 +144,7 @@ export const GameRoom = (props: Props) => {
                   <Button
                     variant="contained"
                     disabled={Cookies.get('userId') !== data?.data.roomMaster}
+                    onClick={() => skipTurnRequest(params.roomId)}
                   >
                     Skip Turn
                   </Button>

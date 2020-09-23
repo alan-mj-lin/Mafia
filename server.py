@@ -11,7 +11,7 @@ from flask import Flask, request
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false
-from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes
+from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes, phase_shift
 from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Player
 
 app = Flask(__name__)
@@ -113,7 +113,14 @@ def game_start(roomId):
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
-        game_start_write(database, roomId)
+        print(roomId)
+        userId = request.cookies.get('userId')
+        is_room_master = check_room_master(database, roomId, userId)
+        if not is_room_master:
+            return build_actual_response({"message": "Not room master"}, 400)
+        able_to_start = game_start_write(database, roomId)
+        if not able_to_start:
+            return build_actual_response({"message": "Not enough players"}, 400)
         return build_actual_response({"message": "Player roles shuffled"}, 200)
 
 
@@ -209,3 +216,18 @@ def night_start(roomId):
             return build_actual_response({"message": "Not room master"}, 400)
         night_start_write(database, roomId)
         return build_actual_response({"message": "Night started"}, 200)
+
+
+@app.route('/room/<roomId>/skip', methods=['PATCH', 'OPTIONS'])
+def skip_turn(roomId):
+    if request.method == 'OPTIONS':
+        return build_preflight_response()
+    elif request.method == 'PATCH':
+        userId = request.cookies.get('userId')
+        is_room_master = check_room_master(database, roomId, userId)
+        if not is_room_master:
+            return build_actual_response({"message": "Not room master"}, 400)
+        valid_phase_shift = phase_shift(database, roomId)
+        if not valid_phase_shift:
+            return build_actual_response({"message": "Not valid phase shift"}, 400)
+        return build_actual_response({"message": "Turn skipped"}, 200)
