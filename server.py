@@ -11,7 +11,7 @@ from flask import Flask, request
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false
-from database_actions import write_new_room, game_start_write, check_mafia, check_doctor, check_detective, kill_action, heal_action, detect_action
+from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes
 from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Player
 
 app = Flask(__name__)
@@ -26,7 +26,7 @@ def create_test_room():
     gameMessages = [Message('Pre-Game', 'Waiting for players...')]
     observerMessages = [Message('Pre-Game', 'Waiting for players...')]
     room = Room('0001', 3, 0, players, targets, 'pre-game', 'pre-game',
-                True, '44444', gameMessages, observerMessages)
+                True, '44444', [], gameMessages, observerMessages)
     database.append(room)
 
 
@@ -158,9 +158,54 @@ def detective_actions(roomId):
         userId = request.cookies.get('userId')
         is_detective, name = check_detective(database, roomId, userId)
         if not is_detective:
-            return build_actual_response({"message": "Not doctor"}, 400)
+            return build_actual_response({"message": "Not detective"}, 400)
         is_valid_target = detect_action(
             database, roomId, name, request.form.get('targetId'))
         if not is_valid_target:
             return build_actual_response({"message": "Not valid target"}, 400)
         return build_actual_response({"message": "Target confirmed"}, 200)
+
+
+@app.route('/room/<roomId>/vote', methods=['PATCH', 'OPTIONS'])
+def hang_action(roomId):
+    if request.method == 'OPTIONS':
+        return build_preflight_response()
+    elif request.method == 'PATCH':
+        userId = request.cookies.get('userId')
+        is_room_master = check_room_master(database, roomId, userId)
+        if is_room_master:
+            return build_actual_response({"message": "Room master cannot vote"}, 400)
+        is_valid_target = vote(database, roomId, userId,
+                               request.form.get('targetId'))
+        if not is_valid_target:
+            return build_actual_response({"message": "Not valid target or already voted"}, 400)
+        return build_actual_response({"message": "Vote Added"}, 200)
+
+
+@app.route('/room/<roomId>/hang', methods=['PATCH', 'OPTIONS'])
+def end_vote_phase(roomId):
+    if request.method == 'OPTIONS':
+        return build_preflight_response()
+    elif request.method == 'PATCH':
+        userId = request.cookies.get('userId')
+        is_room_master = check_room_master(database, roomId, userId)
+        if not is_room_master:
+            return build_actual_response({"message": "Not room master"}, 400)
+
+        valid_vote_result = end_votes(database, roomId)
+        if not valid_vote_result:
+            return build_actual_response({"message": "Not enough votes"}, 200)
+        return build_actual_response({"message": "Valid execution"}, 200)
+
+
+@app.route('/room/<roomId>/night', methods=['PATCH', 'OPTIONS'])
+def night_start(roomId):
+    if request.method == 'OPTIONS':
+        return build_preflight_response()
+    elif request.method == 'PATCH':
+        userId = request.cookies.get('userId')
+        is_room_master = check_room_master(database, roomId, userId)
+        if not is_room_master:
+            return build_actual_response({"message": "Not room master"}, 400)
+        night_start_write(database, roomId)
+        return build_actual_response({"message": "Night started"}, 200)

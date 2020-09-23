@@ -19,7 +19,15 @@ import { stringify } from 'querystring';
 import { PlayerCard } from '../components/PlayerCard';
 import { MessageSideBar } from '../components/MessageSideBar';
 
-import { gameStart, killRequest, healRequest, checkRequest } from '../api/';
+import {
+  gameStart,
+  nightStart,
+  killRequest,
+  healRequest,
+  checkRequest,
+  voteRequest,
+  endVotesRequest,
+} from '../api/';
 
 import { API_URL } from '../var/env';
 
@@ -114,12 +122,14 @@ export const GameRoom = (props: Props) => {
                         ? player.role
                         : '???'
                     }
+                    trueRole={player.role}
                     checked={playerData.role === 'detective' ? player.checked : false}
                     status={player.status}
                     phase={data?.data.phase}
                     onKill={(event) => killRequest(params.roomId, player.userId)}
                     onHeal={(event) => healRequest(params.roomId, player.userId)}
                     onCheck={(event) => checkRequest(params.roomId, player.userId)}
+                    onHang={(event) => voteRequest(params.roomId, player.userId)}
                   />
                 </Grid>
               );
@@ -138,13 +148,21 @@ export const GameRoom = (props: Props) => {
                   </Button>
                   <Button
                     variant="contained"
-                    disabled={Cookies.get('userId') !== data?.data.roomMaster}
+                    disabled={
+                      Cookies.get('userId') !== data?.data.roomMaster ||
+                      data?.data.phase !== 'voting'
+                    }
+                    onClick={() => endVotesRequest(params.roomId)}
                   >
-                    Hang
+                    End Votes
                   </Button>
                   <Button
                     variant="contained"
-                    disabled={Cookies.get('userId') !== data?.data.roomMaster}
+                    disabled={
+                      Cookies.get('userId') !== data?.data.roomMaster ||
+                      data?.data.phase !== 'voting'
+                    }
+                    onClick={() => nightStart(params.roomId)}
                   >
                     Start Night
                   </Button>

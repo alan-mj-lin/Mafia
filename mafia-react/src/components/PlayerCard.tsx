@@ -11,23 +11,27 @@ import spyicon from '../images/spyicon.png';
 export interface PlayerCardProps {
   name: string;
   role: string;
+  trueRole: string;
   status: string;
   phase: string;
   checked: boolean;
   onKill: (event: React.MouseEvent<unknown>) => void;
   onCheck: (event: React.MouseEvent<unknown>) => void;
   onHeal: (event: React.MouseEvent<unknown>) => void;
+  onHang: (event: React.MouseEvent<unknown>) => void;
 }
 
 export const PlayerCard = ({
   name,
   role,
+  trueRole,
   status,
   phase,
   checked,
   onKill,
   onHeal,
   onCheck,
+  onHang,
 }: PlayerCardProps) => {
   const classes = useStyles();
   return (
@@ -37,6 +41,11 @@ export const PlayerCard = ({
         <Card.Title>{name}</Card.Title>
         <Card.Text>{role}</Card.Text>
         <Card.Text>{status}</Card.Text>
+
+        {checked && trueRole === 'mafia' && <Avatar className={classes.red}></Avatar>}
+        {checked && trueRole !== 'mafia' && <Avatar className={classes.green}></Avatar>}
+        {!checked && <Avatar className={classes.grey}></Avatar>}
+        <hr></hr>
         <ButtonGroup>
           <Button
             variant="primary"
@@ -59,13 +68,13 @@ export const PlayerCard = ({
           >
             Heal
           </Button>
-          <span> &nbsp; </span>
-          <span> &nbsp; </span>
-          <span> &nbsp; </span>
-          <span> &nbsp; </span>
-          {checked && role === 'mafia' && <Avatar className={classes.red}></Avatar>}
-          {checked && role !== 'mafia' && <Avatar className={classes.green}></Avatar>}
-          {!checked && <Avatar className={classes.grey}></Avatar>}
+          <Button
+            variant="primary"
+            disabled={phase !== 'voting'}
+            onClick={(event) => onHang(event)}
+          >
+            Hang
+          </Button>
         </ButtonGroup>
       </Card.Body>
     </Card>

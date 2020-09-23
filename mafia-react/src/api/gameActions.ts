@@ -6,6 +6,10 @@ export function gameStart(roomId: string): Promise<AxiosResponse> {
   return axios.patch(`${API_URL}/room/${roomId}/start`);
 }
 
+export function nightStart(roomId: string): Promise<AxiosResponse> {
+  return axios.patch(`${API_URL}/room/${roomId}/night`, null, { withCredentials: true });
+}
+
 export function killRequest(roomId: string, targetId: string): Promise<AxiosResponse> {
   return axios.patch(
     `${API_URL}/room/${roomId}/kill`,
@@ -28,4 +32,16 @@ export function checkRequest(roomId: string, targetId: string): Promise<AxiosRes
     stringify({ targetId: targetId }),
     { withCredentials: true },
   );
+}
+
+export function voteRequest(roomId: string, targetId: string): Promise<AxiosResponse> {
+  return axios.patch(
+    `${API_URL}/room/${roomId}/vote`,
+    stringify({ targetId: targetId }),
+    { withCredentials: true },
+  );
+}
+
+export function endVotesRequest(roomId: string): Promise<AxiosResponse> {
+  return axios.patch(`${API_URL}/room/${roomId}/hang`, null, { withCredentials: true });
 }

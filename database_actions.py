@@ -1,8 +1,19 @@
 import uuid
 import json
 import random
+from math import ceil
 from utils import write_json, generateGameRoomKey
-from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Player
+from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Player, Vote
+
+
+def get_room(database, roomId):
+    room_data = None
+
+    for i in database:
+        if i.id == roomId:
+            room_data = i
+
+    return room_data
 
 
 def write_new_room(database, numMafia):
@@ -17,6 +28,7 @@ def write_new_room(database, numMafia):
         "pre-game",
         True,
         uuid.uuid4().hex,
+        [],
         [Message("Waiting for players", "Waiting for players")],
         [Message("Waiting for players", "Waiting for players")]
     )
@@ -27,11 +39,7 @@ def write_new_room(database, numMafia):
 def game_start_write(database, roomId):
     # shuffle the roles and assign them
     roles = []
-    room_data = None
-
-    for i in database:
-        if i.id == roomId:
-            room_data = i
+    room_data = get_room(database, roomId)
 
     for i in range(0, room_data.numMafia):
         roles.append('mafia')
@@ -63,6 +71,29 @@ def game_start_write(database, roomId):
         Message("Night " + str(room_data.night), "The night has begun!"))
 
 
+def night_start_write(database, roomId):
+    room_data = get_room(database, roomId)
+
+    room_data.night += 1
+    room_data.phase = 'mafia'
+    room_data.gameMessages.append(
+        Message("Night " + str(room_data.night), "The night has begun!"))
+    room_data.gameMessages.append(
+        Message("Mafia Phase", "Mafia pick someone to kill"))
+    # observer messages
+    room_data.observerMessages.append(
+        Message("Night " + str(room_data.night), "The night has begun!"))
+
+
+def check_room_master(database, roomId, masterId):
+    room_data = get_room(database, roomId)
+
+    if masterId == room_data.roomMaster:
+        return True
+    else:
+        return False
+
+
 def check_mafia(database, roomId, killerId):
     room_data = None
     name = None
@@ -80,12 +111,8 @@ def check_mafia(database, roomId, killerId):
 
 
 def check_doctor(database, roomId, doctorId):
-    room_data = None
+    room_data = get_room(database, roomId)
     name = None
-    print(doctorId)
-    for i in database:
-        if i.id == roomId:
-            room_data = i
     for i in room_data.players:
         print('user ids: ' + i.userId)
         if i.userId == doctorId and i.role == 'doctor':
@@ -96,12 +123,8 @@ def check_doctor(database, roomId, doctorId):
 
 
 def check_detective(database, roomId, detectiveId):
-    room_data = None
+    room_data = get_room(database, roomId)
     name = None
-    print(detectiveId)
-    for i in database:
-        if i.id == roomId:
-            room_data = i
     for i in room_data.players:
         print('user ids: ' + i.userId)
         if i.userId == detectiveId and i.role == 'detective':
@@ -112,11 +135,7 @@ def check_detective(database, roomId, detectiveId):
 
 
 def kill_action(database, roomId, name, targetId):
-    room_data = None
-
-    for i in database:
-        if i.id == roomId:
-            room_data = i
+    room_data = get_room(database, roomId)
 
     for i in room_data.players:
         if i.userId == targetId and i.status == 'alive':
@@ -133,11 +152,7 @@ def kill_action(database, roomId, name, targetId):
 
 
 def heal_action(database, roomId, name, targetId):
-    room_data = None
-
-    for i in database:
-        if i.id == roomId:
-            room_data = i
+    room_data = get_room(database, roomId)
 
     for i in room_data.players:
         if i.userId == targetId and i.status == 'alive':
@@ -146,20 +161,36 @@ def heal_action(database, roomId, name, targetId):
             # transition to detective phase
             room_data.phase = 'detective'
             room_data.gameMessages.append(
-                Message('Detective Phase', 'Doctor pick someone to heal'))
+                Message('Detective Phase', 'Detective pick someone to check'))
             room_data.observerMessages.append(
                 Message('Doctor Action', name + " healed " + i.name))
             return True
     return False
 
 
-def detect_action(database, roomId, name, targetId):
-    room_data = None
-    deathId = None
+def evaluate_win(room_data, players_left, num_mafia):
+    num_civs = players_left - num_mafia
+    if num_civs <= num_mafia:
+        room_data.status = 'ended'
+        room_data.phase = 'ended'
+        room_data.gameMessages.append(
+            Message('Game Over', 'All the villagers were brutally executed by the Mafia.'))
+        room_data.observerMessages.append(
+            Message('Game Over', 'All the villagers were brutally executed by the Mafia.'))
+        return True
+    if num_mafia == 0:
+        room_data.status = 'ended'
+        room_data.phase = 'ended'
+        room_data.gameMessages.append(
+            Message('Game Over', 'The villagers weeded out all the Mafia.'))
+        room_data.observerMessages.append(
+            Message('Game Over', 'The villagers weeded out all the Mafia.'))
+        return True
 
-    for i in database:
-        if i.id == roomId:
-            room_data = i
+
+def detect_action(database, roomId, name, targetId):
+    room_data = get_room(database, roomId)
+    deathId = None
 
     if room_data.targets.killTarget != room_data.targets.healTarget:
         deathId = room_data.targets.killTarget
@@ -171,20 +202,100 @@ def detect_action(database, roomId, name, targetId):
             room_data.gameMessages.append(
                 Message('Night End', i.name + ' was killed'))
 
-    for i in room_data.players:
-        if i.userId == targetId and i.status == 'alive':
-            # set targets
-            for x in room_data.players:
-                if x.userId == targetId:
-                    x.checked = True
-            # transition to detective phase
-            if deathId is None:
+    # evaluate win
+    players_left = sum(
+        players.status == 'alive' for players in room_data.players)
+
+    mafia_left = sum(players.status == 'alive' and players.role ==
+                     'mafia' for players in room_data.players)
+
+    is_game_over = evaluate_win(room_data, players_left, mafia_left)
+
+    if not is_game_over:
+
+        for i in room_data.players:
+            if i.userId == targetId and i.status == 'alive':
+                # set targets
+                for x in room_data.players:
+                    if x.userId == targetId:
+                        x.checked = True
+                # transition to detective phase
+                if deathId is None:
+                    room_data.gameMessages.append(
+                        Message('Night End', 'The victim was healed'))
+                room_data.targets = Targets('', '', '')
+                room_data.phase = 'voting'
                 room_data.gameMessages.append(
-                    Message('Night End', 'The victim was healed'))
-            room_data.phase = 'voting'
-            room_data.gameMessages.append(
-                Message('Voting Phase', 'The night is over! Who is the mafia?'))
-            room_data.observerMessages.append(
-                Message('Detective Action', name + " checked " + i.name))
+                    Message('Voting Phase', 'The night is over! Who is the mafia?'))
+                room_data.observerMessages.append(
+                    Message('Detective Action', name + " checked " + i.name))
+                return True
+        return False
+    return True
+
+
+def vote(database, roomId, userId, targetId):
+    room_data = get_room(database, roomId)
+
+    for i in room_data.votes:
+        if i.userId == userId:  # already voted
+            return False
+
+    for i in room_data.players:
+        if i.userId == targetId:
+            room_data.votes.append(Vote(userId, targetId, i.name))
             return True
     return False
+
+
+def end_votes(database, roomId):
+    room_data = get_room(database, roomId)
+    max_count = 0
+    suspectIdList = []
+    is_execution = False
+    for i in room_data.players:
+        count = sum(vote.targetId == i.userId for vote in room_data.votes)
+        if count > max_count:
+            max_count = count
+            suspectIdList.clear()
+            suspectIdList.append(i.userId)
+        elif count == max_count:
+            suspectIdList.append(i.userId)
+
+    max_count = ceil(max_count)
+    players_left = sum(
+        players.status == 'alive' for players in room_data.players)
+
+    print(max_count, ceil(players_left/2))
+    if max_count >= ceil(players_left/2):
+        for i in room_data.players:
+            if i.userId == suspectIdList[0]:
+                i.status = 'dead'
+                room_data.votes.clear()
+                room_data.gameMessages.append(
+                    Message('Execution', i.name + ' was hanged'))
+                room_data.observerMessages.append(
+                    Message('Execution', i.name + ' was hanged'))
+                is_execution = True
+
+    mafia_left = sum(players.status == 'alive' and players.role ==
+                     'mafia' for players in room_data.players)
+
+    players_left = sum(
+        players.status == 'alive' for players in room_data.players)
+
+    is_game_over = evaluate_win(room_data, players_left, mafia_left)
+
+    if not is_game_over and is_execution:
+        return True
+
+    if not is_game_over and not is_execution:
+        room_data.votes.clear()
+        room_data.gameMessages.append(
+            Message('Execution', 'Not enough votes, no one was hanged.'))
+        room_data.observerMessages.append(
+            Message('Execution', 'Not enough votes, no one was hanged.'))
+        return False
+
+    if is_game_over:
+        return True
