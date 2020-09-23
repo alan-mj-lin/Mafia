@@ -2,6 +2,7 @@ import json
 import random
 import string
 from flask import make_response
+from database import RoomEncoder
 
 DOMAIN = '127.0.0.1'
 
@@ -10,9 +11,10 @@ CORS = 'http://localhost:3000'
 
 def build_preflight_response():
     response = make_response()
-    response.headers.add("Access-Control-Allow-Origin", CORS)
-    response.headers.add('Access-Control-Allow-Headers', "*")
-    response.headers.add('Access-Control-Allow-Methods', "PATCH, OPTIONS")
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Origin', CORS)
+    response.headers.add('Access-Control-Allow-Methods',
+                         'GET,POST,PATCH,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
@@ -24,13 +26,15 @@ def build_actual_response(json, status, setCookie=False, cookie=''):
         response.set_cookie('userId', cookie)
     response.headers.add("Access-Control-Allow-Origin", CORS)
     response.headers.add('Access-Control-Allow-Credentials', 'true')
-    print(response)
+    response.headers.add('Access-Control-Allow-Methods',
+                         '*')
+    response.headers.add('Content-Type', 'application/json')
     return response
 
 
 def write_json(data, filename='database.json'):
     with open(filename, 'w') as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, f, indent=4, cls=RoomEncoder)
 
 
 def generateGameRoomKey(length=8):

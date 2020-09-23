@@ -19,7 +19,7 @@ import { stringify } from 'querystring';
 import { PlayerCard } from '../components/PlayerCard';
 import { MessageSideBar } from '../components/MessageSideBar';
 
-import { gameStart, killRequest } from '../api/';
+import { gameStart, killRequest, healRequest, checkRequest } from '../api/';
 
 import { API_URL } from '../var/env';
 
@@ -32,6 +32,7 @@ interface PlayerType {
   role: string;
   status: string;
   userId: string;
+  checked: boolean;
 }
 
 interface Props {
@@ -113,9 +114,12 @@ export const GameRoom = (props: Props) => {
                         ? player.role
                         : '???'
                     }
+                    checked={playerData.role === 'detective' ? player.checked : false}
                     status={player.status}
                     phase={data?.data.phase}
                     onKill={(event) => killRequest(params.roomId, player.userId)}
+                    onHeal={(event) => healRequest(params.roomId, player.userId)}
+                    onCheck={(event) => checkRequest(params.roomId, player.userId)}
                   />
                 </Grid>
               );

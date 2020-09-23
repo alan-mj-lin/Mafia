@@ -3,30 +3,30 @@
         {
             "id": "0001",
             "numMafia": 3,
-            "night": 2,
+            "night": 1,
             "players": [
                 {
                     "name": "alan",
                     "userId": "12354",
-                    "role": "doctor",
+                    "role": "mafia",
                     "status": "dead"
                 },
                 {
                     "name": "noob",
                     "userId": "42314",
-                    "role": "mafia",
+                    "role": "civilian",
                     "status": "alive"
                 },
                 {
                     "name": "mafia-pro",
                     "userId": "12345345354",
-                    "role": "civilian",
+                    "role": "doctor",
                     "status": "alive"
                 },
                 {
                     "name": "not-fun",
                     "userId": "1123122354",
-                    "role": "detective",
+                    "role": "civilian",
                     "status": "alive"
                 },
                 {
@@ -38,7 +38,7 @@
                 {
                     "name": "fun",
                     "userId": "1123122354",
-                    "role": "civilian",
+                    "role": "detective",
                     "status": "alive"
                 },
                 {
@@ -48,10 +48,15 @@
                     "status": "alive"
                 }
             ],
+            "targets": {
+                "killTarget": "",
+                "healTarget": "",
+                "checkTarget": ""
+            },
             "status": "in-progress",
-            "phase": "doctor",
-            "polling": true,
-            "roomMaster": "8cb2f60fdff14d5ea32c16eea39c691f",
+            "phase": "mafia",
+            "polling": false,
+            "roomMaster": "6828a06020e54cdb874e5068a3b53cd9",
             "gameMessages": [
                 {
                     "primary": "Pre-Game",
@@ -62,16 +67,12 @@
                     "secondary": "Room is no longer accepting new players"
                 },
                 {
-                    "primary": "Night 2",
+                    "primary": "Night 1",
                     "secondary": "The night has begun!"
                 },
                 {
                     "primary": "Mafia Phase",
                     "secondary": "Mafia pick someone to kill"
-                },
-                {
-                    "primary": "Doctor Phase",
-                    "secondary": "Doctor pick someone to heal"
                 }
             ],
             "observerMessages": [
@@ -80,12 +81,8 @@
                     "secondary": "Waiting for players.."
                 },
                 {
-                    "primary": "Night 2",
+                    "primary": "Night 1",
                     "secondary": "The night has begun!"
-                },
-                {
-                    "primary": "Mafia Action",
-                    "secondary": "cool killed alan"
                 }
             ]
         },
@@ -114,6 +111,33 @@
                 {
                     "primary": "Waiting for players",
                     "secondary": "Waiting for players.."
+                }
+            ]
+        },
+        {
+            "id": "DFLYXNIQ",
+            "numMafia": 3,
+            "night": 0,
+            "players": [],
+            "targets": {
+                "killTarget": "",
+                "healTarget": "",
+                "checkTarget": ""
+            },
+            "status": "pregame",
+            "phase": "pre-game",
+            "polling": false,
+            "roomMaster": "dbcb01a94e064462b56a0d3a8698a1d7",
+            "gameMessages": [
+                {
+                    "primary": "Waiting for players",
+                    "secondary": "Waiting for players"
+                }
+            ],
+            "observerMessages": [
+                {
+                    "primary": "Waiting for players",
+                    "secondary": "Waiting for players"
                 }
             ]
         }

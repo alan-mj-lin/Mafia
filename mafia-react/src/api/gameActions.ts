@@ -13,3 +13,19 @@ export function killRequest(roomId: string, targetId: string): Promise<AxiosResp
     { withCredentials: true },
   );
 }
+
+export function healRequest(roomId: string, targetId: string): Promise<AxiosResponse> {
+  return axios.patch(
+    `${API_URL}/room/${roomId}/heal`,
+    stringify({ targetId: targetId }),
+    { withCredentials: true },
+  );
+}
+
+export function checkRequest(roomId: string, targetId: string): Promise<AxiosResponse> {
+  return axios.patch(
+    `${API_URL}/room/${roomId}/check`,
+    stringify({ targetId: targetId }),
+    { withCredentials: true },
+  );
+}

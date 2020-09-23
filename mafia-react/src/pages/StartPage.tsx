@@ -75,13 +75,9 @@ export const StartPage = () => {
           color="primary"
           onClick={async () => {
             await axios
-              .patch(
-                `${API_URL}/actions/create-room`,
-                stringify({ numMafia: mafiaNum }),
-                {
-                  withCredentials: true,
-                },
-              )
+              .post(`${API_URL}/actions/create-room`, stringify({ numMafia: mafiaNum }), {
+                withCredentials: true,
+              })
               .then((data) => {
                 console.log(data);
                 history.push(`/room/${data?.data.roomId}`);
