@@ -10,7 +10,7 @@ from pprint import pprint
 from flask import Flask, request
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
-from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false
+from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false, database_clean_up
 from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes, phase_shift
 from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Player
 
@@ -25,7 +25,7 @@ def create_test_room():
     targets = Targets('', '', '')
     gameMessages = [Message('Pre-Game', 'Waiting for players...')]
     observerMessages = [Message('Pre-Game', 'Waiting for players...')]
-    room = Room('0001', 3, 0, players, targets, 'pre-game', 'pre-game',
+    room = Room('0001', 3, 0, players, targets, 'ended', 'pre-game',
                 True, '44444', [], gameMessages, observerMessages)
     database.append(room)
 
@@ -33,7 +33,10 @@ def create_test_room():
 create_test_room()
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=set_polling_false, trigger="interval", seconds=60)
+scheduler.add_job(func=set_polling_false, args=[database],
+                  trigger="interval", seconds=60)
+scheduler.add_job(func=database_clean_up, args=[database],
+                  trigger='interval', seconds=86400)
 scheduler.start()
 
 

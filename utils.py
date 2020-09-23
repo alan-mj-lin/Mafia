@@ -1,6 +1,7 @@
 import json
 import random
 import string
+from pprint import pprint
 from flask import make_response
 from database import RoomEncoder
 
@@ -42,11 +43,12 @@ def generateGameRoomKey(length=8):
     return ''.join(random.choice(letters) for i in range(length))
 
 
-def set_polling_false():
-    with open('database.json') as file:
-        data = json.load(file)
+def set_polling_false(database):
+    for i in database:
+        i.polling = False
 
-        for i in data['rooms']:
-            i['polling'] = False
 
-    write_json(data)
+def database_clean_up(database):
+    print('Data state: ')
+    print(database)
+    database[:] = [i for i in database if i.status != 'ended']
