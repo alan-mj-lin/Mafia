@@ -125,7 +125,11 @@ export const GameRoom = (props: Props) => {
                         : '???'
                     }
                     trueRole={player.role}
-                    checked={playerData.role === 'detective' ? player.checked : false}
+                    checked={
+                      playerData !== undefined && playerData.role === 'detective'
+                        ? player.checked
+                        : false
+                    }
                     status={player.status}
                     phase={data?.data.phase}
                     onKill={(event) => killRequest(params.roomId, player.userId)}
