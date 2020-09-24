@@ -8,7 +8,6 @@ import random
 import string
 from pprint import pprint
 from flask import Flask, request
-from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false, database_clean_up
 from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes, phase_shift
