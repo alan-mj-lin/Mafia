@@ -25,7 +25,7 @@ def create_test_room():
     targets = Targets('', '', '')
     gameMessages = [Message('Pre-Game', 'Waiting for players...')]
     observerMessages = [Message('Pre-Game', 'Waiting for players...')]
-    room = Room('0001', 3, 0, players, targets, 'ended', 'pre-game',
+    room = Room('0001', 3, 0, players, targets, 'pre-game', 'pre-game',
                 True, '44444', [], gameMessages, observerMessages)
     database.append(room)
 
