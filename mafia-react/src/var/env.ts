@@ -1,2 +1,2 @@
-export const API_URL = "http://localhost:8000";
-export const DOMAIN = "127.0.0.1";
+export const API_URL = 'http://mafia.tjcav.com';
+export const DOMAIN = '127.0.0.1';
