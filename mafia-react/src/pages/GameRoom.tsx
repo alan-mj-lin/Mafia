@@ -109,6 +109,7 @@ export const GameRoom = (props: Props) => {
               const playerData = data?.data.players.find(
                 (player: PlayerType) => player.userId === Cookies.get('userId'),
               );
+              console.log(playerData);
               return (
                 <Grid item>
                   <PlayerCard
