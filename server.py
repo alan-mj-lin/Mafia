@@ -20,6 +20,8 @@ app = Flask(__name__, static_folder='./mafia-react/build',
 
 database = []
 
+app.logger.setLevel(logging.INFO)
+
 
 def create_test_room():
     players = [Player('alan', '12354', 'mafia', 'alive', False), Player('noob', '42314', 'civilian', 'alive', False), Player(
