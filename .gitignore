@@ -3,3 +3,4 @@
 **/__pycache__
 .vscode/settings.json
 mafia-react/var/
+mafia-react/src/var/env.ts
