@@ -84,7 +84,9 @@ export const GameRoom = (props: Props) => {
       refetchInterval: 2000,
     },
   );
-
+  const playerData = data?.data.players.find(
+    (player: PlayerType) => player.userId === Cookies.get('userId'),
+  );
   return (
     <div>
       {error && (
@@ -106,10 +108,6 @@ export const GameRoom = (props: Props) => {
           <Typography variant="h2">Game Room</Typography>
           <Grid sm={8} container className={classes.root} spacing={2}>
             {data?.data.players.map((player: PlayerType) => {
-              const playerData = data?.data.players.find(
-                (player: PlayerType) => player.userId === Cookies.get('userId'),
-              );
-              console.log(playerData);
               return (
                 <Grid item>
                   <PlayerCard
@@ -141,7 +139,13 @@ export const GameRoom = (props: Props) => {
               );
             })}
           </Grid>
-          <MessageSideBar messages={data?.data.gameMessages} />
+          <MessageSideBar
+            messages={
+              playerData !== undefined
+                ? data?.data.gameMessages
+                : data?.data.observerMessages
+            }
+          />
           <HideOnScroll {...props}>
             <AppBar position="fixed" color="primary" className={classes.appBar}>
               <Toolbar>
