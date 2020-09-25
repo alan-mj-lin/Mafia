@@ -57,7 +57,7 @@ app.logger.info(
 @app.route('/room', methods=['GET', 'OPTIONS'])
 def get_room_json():
     app.logger.info(
-        request.environ['HTTP_X_REAL_IP'] + ' requested ' + request.url)
+        request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'GET':
@@ -75,7 +75,7 @@ def get_room_json():
 # create a new room object in database.json
 @app.route('/actions/create-room', methods=['POST', 'OPTIONS'])
 def create_room():
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     global database
     if request.method == 'OPTIONS':
         return build_preflight_response()
@@ -91,7 +91,7 @@ def create_room():
 # add player object to room
 @app.route('/actions/join-room', methods=['POST', 'OPTIONS'])
 def join_room():
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'POST':
@@ -123,7 +123,7 @@ def join_room():
 
 @app.route('/room/<roomId>/start', methods=['PATCH', 'OPTIONS'])
 def game_start(roomId):
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -139,7 +139,7 @@ def game_start(roomId):
 
 @app.route('/room/<roomId>/kill', methods=['PATCH', 'OPTIONS'])
 def mafia_actions(roomId):
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -157,7 +157,7 @@ def mafia_actions(roomId):
 
 @app.route('/room/<roomId>/heal', methods=['PATCH', 'OPTIONS'])
 def doctor_actions(roomId):
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -174,7 +174,7 @@ def doctor_actions(roomId):
 
 @app.route('/room/<roomId>/check', methods=['PATCH', 'OPTIONS'])
 def detective_actions(roomId):
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -191,7 +191,7 @@ def detective_actions(roomId):
 
 @app.route('/room/<roomId>/vote', methods=['PATCH', 'OPTIONS'])
 def hang_action(roomId):
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -208,7 +208,7 @@ def hang_action(roomId):
 
 @app.route('/room/<roomId>/hang', methods=['PATCH', 'OPTIONS'])
 def end_vote_phase(roomId):
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -225,7 +225,7 @@ def end_vote_phase(roomId):
 
 @app.route('/room/<roomId>/night', methods=['PATCH', 'OPTIONS'])
 def night_start(roomId):
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -239,7 +239,7 @@ def night_start(roomId):
 
 @app.route('/room/<roomId>/skip', methods=['PATCH', 'OPTIONS'])
 def skip_turn(roomId):
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -255,5 +255,5 @@ def skip_turn(roomId):
 
 @app.route('/')
 def index():
-    app.logger.info(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.access_route[0] + ' requested ' + request.url)
     return app.send_static_file('index.html')
