@@ -21,7 +21,6 @@ def build_preflight_response():
 
 
 def build_actual_response(json, status, setCookie=False, cookie=''):
-    print(cookie)
     response = make_response(json, status)
     if setCookie:
         response.set_cookie('userId', cookie)
@@ -49,6 +48,4 @@ def set_polling_false(database):
 
 
 def database_clean_up(database):
-    print('Data state: ')
-    print(database)
     database[:] = [i for i in database if i.status != 'ended']

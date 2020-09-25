@@ -6,8 +6,10 @@ import json
 import uuid
 import random
 import string
+import logging
 from pprint import pprint
-from flask import Flask, request
+from flask import Flask, request, has_request_context
+from flask.logging import default_handler
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false, database_clean_up
 from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes, phase_shift
@@ -30,6 +32,8 @@ def create_test_room():
                 True, '44444', [], gameMessages, observerMessages)
     database.append(room)
 
+    app.logger.info('Test room created..')
+
 
 create_test_room()
 
@@ -39,12 +43,15 @@ scheduler.add_job(func=set_polling_false, args=[database],
 scheduler.add_job(func=database_clean_up, args=[database],
                   trigger='interval', seconds=86400)
 scheduler.start()
+app.logger.info(
+    'Background processes for polling detection and database cleanup initiated..')
 
 # will only return json for a particular room
 
 
 @app.route('/room', methods=['GET', 'OPTIONS'])
 def get_room_json():
+    app.logger.warning(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'GET':
@@ -52,9 +59,6 @@ def get_room_json():
         roomFound = False
         for i in database:
             if i.id == roomId:
-                pprint(vars(i))
-                for x in i.players:
-                    pprint(vars(x))
                 roomFound = True
                 i.polling = True
                 return build_actual_response(json.dumps(i, indent=4, cls=RoomEncoder), 200)
@@ -65,14 +69,13 @@ def get_room_json():
 # create a new room object in database.json
 @app.route('/actions/create-room', methods=['POST', 'OPTIONS'])
 def create_room():
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     global database
-    print(request.form.get('numMafia'))
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'POST':
         database, new_room = write_new_room(
             database, request.form.get('numMafia'))
-        print(database)
         return build_actual_response({
             "message": "Room created",
             "roomId": new_room.id
@@ -82,13 +85,12 @@ def create_room():
 # add player object to room
 @app.route('/actions/join-room', methods=['POST', 'OPTIONS'])
 def join_room():
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'POST':
         userId = request.cookies.get('userId')
-        print(userId)
         roomId = request.form['roomId']
-        print(request.form['roomId'])
         isValidRoom = False
         room = None
         new_player = Player(request.form.get('name'),
@@ -115,10 +117,10 @@ def join_room():
 
 @app.route('/room/<roomId>/start', methods=['PATCH', 'OPTIONS'])
 def game_start(roomId):
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
-        print(roomId)
         userId = request.cookies.get('userId')
         is_room_master = check_room_master(database, roomId, userId)
         if not is_room_master:
@@ -131,6 +133,7 @@ def game_start(roomId):
 
 @app.route('/room/<roomId>/kill', methods=['PATCH', 'OPTIONS'])
 def mafia_actions(roomId):
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -148,6 +151,7 @@ def mafia_actions(roomId):
 
 @app.route('/room/<roomId>/heal', methods=['PATCH', 'OPTIONS'])
 def doctor_actions(roomId):
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -164,6 +168,7 @@ def doctor_actions(roomId):
 
 @app.route('/room/<roomId>/check', methods=['PATCH', 'OPTIONS'])
 def detective_actions(roomId):
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -180,6 +185,7 @@ def detective_actions(roomId):
 
 @app.route('/room/<roomId>/vote', methods=['PATCH', 'OPTIONS'])
 def hang_action(roomId):
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -196,6 +202,7 @@ def hang_action(roomId):
 
 @app.route('/room/<roomId>/hang', methods=['PATCH', 'OPTIONS'])
 def end_vote_phase(roomId):
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -212,6 +219,7 @@ def end_vote_phase(roomId):
 
 @app.route('/room/<roomId>/night', methods=['PATCH', 'OPTIONS'])
 def night_start(roomId):
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -225,6 +233,7 @@ def night_start(roomId):
 
 @app.route('/room/<roomId>/skip', methods=['PATCH', 'OPTIONS'])
 def skip_turn(roomId):
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -240,4 +249,5 @@ def skip_turn(roomId):
 
 @app.route('/')
 def index():
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     return app.send_static_file('index.html')
