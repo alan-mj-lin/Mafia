@@ -52,9 +52,7 @@ def get_room_json():
         roomFound = False
         for i in database:
             if i.id == roomId:
-                pprint(vars(i))
                 for x in i.players:
-                    pprint(vars(x))
                 roomFound = True
                 i.polling = True
                 return build_actual_response(json.dumps(i, indent=4, cls=RoomEncoder), 200)
@@ -66,13 +64,11 @@ def get_room_json():
 @app.route('/actions/create-room', methods=['POST', 'OPTIONS'])
 def create_room():
     global database
-    print(request.form.get('numMafia'))
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'POST':
         database, new_room = write_new_room(
             database, request.form.get('numMafia'))
-        print(database)
         return build_actual_response({
             "message": "Room created",
             "roomId": new_room.id
@@ -86,9 +82,7 @@ def join_room():
         return build_preflight_response()
     elif request.method == 'POST':
         userId = request.cookies.get('userId')
-        print(userId)
         roomId = request.form['roomId']
-        print(request.form['roomId'])
         isValidRoom = False
         room = None
         new_player = Player(request.form.get('name'),
@@ -118,7 +112,6 @@ def game_start(roomId):
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
-        print(roomId)
         userId = request.cookies.get('userId')
         is_room_master = check_room_master(database, roomId, userId)
         if not is_room_master:

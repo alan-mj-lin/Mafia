@@ -107,7 +107,6 @@ def check_mafia(database, roomId, killerId):
         if i.id == roomId:
             room_data = i
     for i in room_data.players:
-        print('user ids: ' + i.userId)
         if i.userId == killerId and i.role == 'mafia':
             name = i.name
             return True, name
@@ -119,7 +118,6 @@ def check_doctor(database, roomId, doctorId):
     room_data = get_room(database, roomId)
     name = None
     for i in room_data.players:
-        print('user ids: ' + i.userId)
         if i.userId == doctorId and i.role == 'doctor':
             name = i.name
             return True, name
@@ -131,7 +129,6 @@ def check_detective(database, roomId, detectiveId):
     room_data = get_room(database, roomId)
     name = None
     for i in room_data.players:
-        print('user ids: ' + i.userId)
         if i.userId == detectiveId and i.role == 'detective':
             name = i.name
             return True, name
@@ -271,7 +268,7 @@ def end_votes(database, roomId):
     players_left = sum(
         players.status == 'alive' for players in room_data.players)
 
-    print(max_count, ceil(players_left/2))
+    # print(max_count, ceil(players_left/2))
     if max_count >= ceil(players_left/2):
         for i in room_data.players:
             if i.userId == suspectIdList[0]:

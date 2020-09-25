@@ -49,6 +49,4 @@ def set_polling_false(database):
 
 
 def database_clean_up(database):
-    print('Data state: ')
-    print(database)
     database[:] = [i for i in database if i.status != 'ended']
