@@ -21,7 +21,6 @@ def build_preflight_response():
 
 
 def build_actual_response(json, status, setCookie=False, cookie=''):
-    print(cookie)
     response = make_response(json, status)
     if setCookie:
         response.set_cookie('userId', cookie)
