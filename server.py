@@ -56,7 +56,7 @@ app.logger.info(
 
 @app.route('/room', methods=['GET', 'OPTIONS'])
 def get_room_json():
-    app.logger.warning(request.remote_addr + ' requested ' + request.url)
+    app.logger.info(request.remote_addr + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'GET':
