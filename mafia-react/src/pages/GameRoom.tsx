@@ -77,7 +77,7 @@ export const GameRoom = (props: Props) => {
         withCredentials: true,
       });
 
-      console.log(room);
+      // console.log(room);
       return room;
     },
     {
@@ -188,7 +188,7 @@ export const GameRoom = (props: Props) => {
                     Start Game
                   </Button>
                 </ButtonGroup>
-                {Cookies.get('userId') && <h2>{Cookies.get('userId')}</h2>}
+                {/* {Cookies.get('userId') && <h2>{Cookies.get('userId')}</h2>} */}
               </Toolbar>
             </AppBar>
           </HideOnScroll>
