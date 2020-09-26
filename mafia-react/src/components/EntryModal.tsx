@@ -17,9 +17,10 @@ import { API_URL } from '../var/env';
 export interface EntryModalProps {
   playerData: PlayerType | undefined;
   roomId: string;
+  isRoomMaster: boolean;
 }
 
-export const EntryModal = ({ playerData, roomId }: EntryModalProps) => {
+export const EntryModal = ({ playerData, roomId, isRoomMaster }: EntryModalProps) => {
   const classes = useStyles();
   const [displayName, setDisplayName] = useState<string>('');
   const [open, setOpen] = useState<boolean>(true);
@@ -30,7 +31,9 @@ export const EntryModal = ({ playerData, roomId }: EntryModalProps) => {
     <Modal
       className={classes.modal}
       open={
-        playerData !== undefined || Cookies.get('userId') === 'observer' ? false : true
+        playerData !== undefined || Cookies.get('userId') === 'observer' || isRoomMaster
+          ? false
+          : true
       }
       closeAfterTransition
       BackdropComponent={Backdrop}
