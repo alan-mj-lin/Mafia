@@ -86,18 +86,6 @@ export const StartPage = () => {
         >
           Create Room
         </Button>
-        <br />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={async () => {
-            await axios.get(`${API_URL}/clear-cookie`, {
-              withCredentials: true,
-            });
-          }}
-        >
-          Clear Cookie
-        </Button>
       </form>
     </Container>
   );
