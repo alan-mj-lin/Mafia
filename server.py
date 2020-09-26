@@ -126,7 +126,7 @@ def join_room():
 # all routes for game actions ---------------------------
 
 
-@app.route('/room/<roomId>/start', methods=['PATCH', 'OPTIONS'])
+@app.route('/rooms/<roomId>/start', methods=['PATCH', 'OPTIONS'])
 def game_start(roomId):
     app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
@@ -142,7 +142,7 @@ def game_start(roomId):
         return build_actual_response({"message": "Player roles shuffled"}, 200)
 
 
-@app.route('/room/<roomId>/kill', methods=['PATCH', 'OPTIONS'])
+@app.route('/rooms/<roomId>/kill', methods=['PATCH', 'OPTIONS'])
 def mafia_actions(roomId):
     app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
@@ -160,7 +160,7 @@ def mafia_actions(roomId):
         return build_actual_response({"message": "Target confirmed"}, 200)
 
 
-@app.route('/room/<roomId>/heal', methods=['PATCH', 'OPTIONS'])
+@app.route('/rooms/<roomId>/heal', methods=['PATCH', 'OPTIONS'])
 def doctor_actions(roomId):
     app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
@@ -177,7 +177,7 @@ def doctor_actions(roomId):
         return build_actual_response({"message": "Target confirmed"}, 200)
 
 
-@app.route('/room/<roomId>/check', methods=['PATCH', 'OPTIONS'])
+@app.route('/rooms/<roomId>/check', methods=['PATCH', 'OPTIONS'])
 def detective_actions(roomId):
     app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
@@ -194,7 +194,7 @@ def detective_actions(roomId):
         return build_actual_response({"message": "Target confirmed"}, 200)
 
 
-@app.route('/room/<roomId>/vote', methods=['PATCH', 'OPTIONS'])
+@app.route('/rooms/<roomId>/vote', methods=['PATCH', 'OPTIONS'])
 def hang_action(roomId):
     app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
@@ -211,7 +211,7 @@ def hang_action(roomId):
         return build_actual_response({"message": "Vote Added"}, 200)
 
 
-@app.route('/room/<roomId>/hang', methods=['PATCH', 'OPTIONS'])
+@app.route('/rooms/<roomId>/hang', methods=['PATCH', 'OPTIONS'])
 def end_vote_phase(roomId):
     app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
@@ -228,7 +228,7 @@ def end_vote_phase(roomId):
         return build_actual_response({"message": "Valid execution"}, 200)
 
 
-@app.route('/room/<roomId>/night', methods=['PATCH', 'OPTIONS'])
+@app.route('/rooms/<roomId>/night', methods=['PATCH', 'OPTIONS'])
 def night_start(roomId):
     app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
@@ -242,7 +242,7 @@ def night_start(roomId):
         return build_actual_response({"message": "Night started"}, 200)
 
 
-@app.route('/room/<roomId>/skip', methods=['PATCH', 'OPTIONS'])
+@app.route('/rooms/<roomId>/skip', methods=['PATCH', 'OPTIONS'])
 def skip_turn(roomId):
     app.logger.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
