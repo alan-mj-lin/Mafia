@@ -8,7 +8,7 @@ import random
 import string
 import logging
 from pprint import pprint
-from flask import Flask, request, has_request_context
+from flask import Flask, request
 from flask.logging import default_handler
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false, database_clean_up
@@ -96,7 +96,12 @@ def join_room():
         return build_preflight_response()
     elif request.method == 'POST':
         userId = request.cookies.get('userId')
-        roomId = request.form['roomId']
+        roomId = request.form.get('roomId')
+        join_option = request.form.get('option')
+        print(join_option)
+        if join_option == 'observe':
+            return build_actual_response({"message": "Observer connection"}, 200, setCookie=True, cookie='observer')
+
         isValidRoom = False
         room = None
         new_player = Player(request.form.get('name'),

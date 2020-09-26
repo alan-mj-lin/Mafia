@@ -31,6 +31,7 @@ import {
 } from '../api/';
 
 import { API_URL } from '../var/env';
+import { EntryModal } from '../components/EntryModal';
 
 interface RouteParams {
   roomId: string;
@@ -105,6 +106,7 @@ export const GameRoom = (props: Props) => {
       )}
       {!isLoading && data?.status === 200 && (
         <div>
+          <EntryModal playerData={playerData} roomId={params.roomId} />
           <Typography variant="h2">Game Room</Typography>
           <Grid sm={8} container className={classes.root} spacing={2}>
             {data?.data.players.map((player: PlayerType) => {
