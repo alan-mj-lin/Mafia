@@ -18,6 +18,7 @@ import { stringify } from 'querystring';
 
 import { PlayerCard } from '../components/PlayerCard';
 import { MessageSideBar } from '../components/MessageSideBar';
+import { ErrorDialog } from '../components/ErrorDialog';
 
 import {
   gameStart,
@@ -71,6 +72,7 @@ function HideOnScroll(props: Props) {
 export const GameRoom = (props: Props) => {
   const classes = useStyles();
   const params = useParams<RouteParams>();
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const { isLoading, error, data } = useQuery(
     params.roomId,
     async () => {
@@ -132,22 +134,46 @@ export const GameRoom = (props: Props) => {
                     }
                     status={player.status}
                     phase={data?.data.phase}
-                    onKill={(event) => killRequest(params.roomId, player.userId)}
-                    onHeal={(event) => healRequest(params.roomId, player.userId)}
-                    onCheck={(event) => checkRequest(params.roomId, player.userId)}
-                    onHang={(event) => voteRequest(params.roomId, player.userId)}
+                    onKill={async (event) =>
+                      await killRequest(params.roomId, player.userId).catch((err) => {
+                        if (err.response.status >= 400)
+                          setErrorMessage(err.response.data.message);
+                      })
+                    }
+                    onHeal={async (event) =>
+                      await healRequest(params.roomId, player.userId).catch((err) => {
+                        if (err.response.status >= 400)
+                          setErrorMessage(err.response.data.message);
+                      })
+                    }
+                    onCheck={async (event) =>
+                      await checkRequest(params.roomId, player.userId).catch((err) => {
+                        if (err.response.status >= 400)
+                          setErrorMessage(err.response.data.message);
+                      })
+                    }
+                    onHang={async (event) =>
+                      await voteRequest(params.roomId, player.userId).catch((err) => {
+                        if (err.response.status >= 400)
+                          setErrorMessage(err.response.data.message);
+                      })
+                    }
                   />
                 </Grid>
               );
             })}
           </Grid>
+
           <MessageSideBar
             messages={
               playerData !== undefined
                 ? data?.data.gameMessages
                 : data?.data.observerMessages
             }
+            errorMessage={errorMessage}
+            handleErrorClose={() => setErrorMessage('')}
           />
+
           <HideOnScroll {...props}>
             <AppBar position="fixed" color="primary" className={classes.appBar}>
               <Toolbar>
@@ -155,7 +181,12 @@ export const GameRoom = (props: Props) => {
                   <Button
                     variant="contained"
                     disabled={Cookies.get('userId') !== data?.data.roomMaster}
-                    onClick={() => skipTurnRequest(params.roomId)}
+                    onClick={async () =>
+                      await skipTurnRequest(params.roomId).catch((error) => {
+                        if (error.response.status >= 400)
+                          setErrorMessage(error.response.data.message);
+                      })
+                    }
                   >
                     Skip Turn
                   </Button>
@@ -165,7 +196,12 @@ export const GameRoom = (props: Props) => {
                       Cookies.get('userId') !== data?.data.roomMaster ||
                       data?.data.phase !== 'voting'
                     }
-                    onClick={() => endVotesRequest(params.roomId)}
+                    onClick={async () =>
+                      await endVotesRequest(params.roomId).catch((error) => {
+                        if (error.response.status >= 400)
+                          setErrorMessage(error.response.data.message);
+                      })
+                    }
                   >
                     End Votes
                   </Button>
@@ -175,7 +211,12 @@ export const GameRoom = (props: Props) => {
                       Cookies.get('userId') !== data?.data.roomMaster ||
                       data?.data.phase !== 'voting'
                     }
-                    onClick={() => nightStart(params.roomId)}
+                    onClick={async () =>
+                      await nightStart(params.roomId).catch((err) => {
+                        if (err.response.status >= 400)
+                          setErrorMessage(err.response.data.message);
+                      })
+                    }
                   >
                     Start Night
                   </Button>
@@ -185,7 +226,12 @@ export const GameRoom = (props: Props) => {
                       Cookies.get('userId') !== data?.data.roomMaster ||
                       data?.data.status !== 'pre-game'
                     }
-                    onClick={() => gameStart(params.roomId)}
+                    onClick={async () =>
+                      await gameStart(params.roomId).catch((error) => {
+                        if (error.response.status >= 400)
+                          setErrorMessage(error.response.data.message);
+                      })
+                    }
                   >
                     Start Game
                   </Button>
