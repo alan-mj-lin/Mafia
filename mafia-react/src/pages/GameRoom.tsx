@@ -108,7 +108,11 @@ export const GameRoom = (props: Props) => {
       )}
       {!isLoading && data?.status === 200 && (
         <div>
-          <EntryModal playerData={playerData} roomId={params.roomId} />
+          <EntryModal
+            isRoomMaster={data?.data.roomMaster === Cookies.get('userId') ? true : false}
+            playerData={playerData}
+            roomId={params.roomId}
+          />
           <Typography variant="h2">Game Room</Typography>
           <Grid sm={8} container className={classes.root} spacing={2}>
             {data?.data.players.map((player: PlayerType) => {
