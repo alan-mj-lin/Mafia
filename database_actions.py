@@ -24,7 +24,7 @@ def write_new_room(database, numMafia):
         0,
         [],
         targets,
-        "pregame",
+        "pre-game",
         "pre-game",
         True,
         uuid.uuid4().hex,

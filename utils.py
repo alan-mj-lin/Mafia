@@ -20,14 +20,16 @@ def build_preflight_response():
     return response
 
 
-def build_actual_response(json, status, setCookie=False, cookie=''):
+def build_actual_response(json, status, setCookie=False, cookie='', expiryTime=None):
     response = make_response(json, status)
     if setCookie:
         response.set_cookie('userId', cookie)
+    elif setCookie and expiryTime is not None:
+        response.set_cookie('userId', cookie, expires=expiryTime)
     response.headers.add("Access-Control-Allow-Origin", CORS)
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     response.headers.add('Access-Control-Allow-Methods',
-                         '*')
+                         'GET,POST,PATCH,OPTIONS')
     response.headers.add('Content-Type', 'application/json')
     return response
 
