@@ -9,7 +9,7 @@ import string
 import logging
 from pprint import pprint
 from flask import Flask, request
-from flask.logging import default_handler
+from flask.logging import default_handler, create_logger
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false, database_clean_up
 from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes, phase_shift
@@ -20,10 +20,12 @@ app = Flask(__name__, static_folder='./mafia-react/build',
 
 database = []
 
+LOG = create_logger(app)
+
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)
+    LOG.handlers = gunicorn_logger.handlers
+    LOG.setLevel(gunicorn_logger.level)
 
 
 def create_test_room():
@@ -37,7 +39,7 @@ def create_test_room():
                 True, '44444', [], gameMessages, observerMessages)
     database.append(room)
 
-    app.logger.info('Test room created..')
+    LOG.info('Test room created..')
 
 
 create_test_room()
@@ -48,7 +50,7 @@ scheduler.add_job(func=set_polling_false, args=[database],
 scheduler.add_job(func=database_clean_up, args=[database],
                   trigger='interval', seconds=86400)
 scheduler.start()
-app.logger.info(
+LOG.info(
     'Background processes for polling detection and database cleanup initiated..')
 
 # will only return json for a particular room
@@ -56,7 +58,7 @@ app.logger.info(
 
 @app.route('/room', methods=['GET', 'OPTIONS'])
 def get_room_json():
-    app.logger.info(
+    LOG.info(
         request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
@@ -75,7 +77,7 @@ def get_room_json():
 # create a new room object in database.json
 @app.route('/actions/create-room', methods=['POST', 'OPTIONS'])
 def create_room():
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     global database
     if request.method == 'OPTIONS':
         return build_preflight_response()
@@ -91,7 +93,7 @@ def create_room():
 # add player object to room
 @app.route('/actions/join-room', methods=['POST', 'OPTIONS'])
 def join_room():
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'POST':
@@ -128,7 +130,7 @@ def join_room():
 
 @app.route('/rooms/<roomId>/start', methods=['PATCH', 'OPTIONS'])
 def game_start(roomId):
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -144,7 +146,7 @@ def game_start(roomId):
 
 @app.route('/rooms/<roomId>/kill', methods=['PATCH', 'OPTIONS'])
 def mafia_actions(roomId):
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -162,7 +164,7 @@ def mafia_actions(roomId):
 
 @app.route('/rooms/<roomId>/heal', methods=['PATCH', 'OPTIONS'])
 def doctor_actions(roomId):
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -179,7 +181,7 @@ def doctor_actions(roomId):
 
 @app.route('/rooms/<roomId>/check', methods=['PATCH', 'OPTIONS'])
 def detective_actions(roomId):
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -196,7 +198,7 @@ def detective_actions(roomId):
 
 @app.route('/rooms/<roomId>/vote', methods=['PATCH', 'OPTIONS'])
 def hang_action(roomId):
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -213,7 +215,7 @@ def hang_action(roomId):
 
 @app.route('/rooms/<roomId>/hang', methods=['PATCH', 'OPTIONS'])
 def end_vote_phase(roomId):
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -230,7 +232,7 @@ def end_vote_phase(roomId):
 
 @app.route('/rooms/<roomId>/night', methods=['PATCH', 'OPTIONS'])
 def night_start(roomId):
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -244,7 +246,7 @@ def night_start(roomId):
 
 @app.route('/rooms/<roomId>/skip', methods=['PATCH', 'OPTIONS'])
 def skip_turn(roomId):
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'PATCH':
@@ -260,5 +262,5 @@ def skip_turn(roomId):
 
 @app.route('/')
 def index():
-    app.logger.info(request.access_route[0] + ' requested ' + request.url)
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
     return app.send_static_file('index.html')
