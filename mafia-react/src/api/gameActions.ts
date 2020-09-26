@@ -3,16 +3,16 @@ import { stringify } from 'querystring';
 import { API_URL } from '../var/env';
 
 export function gameStart(roomId: string): Promise<AxiosResponse> {
-  return axios.patch(`${API_URL}/room/${roomId}/start`, null, { withCredentials: true });
+  return axios.patch(`${API_URL}/rooms/${roomId}/start`, null, { withCredentials: true });
 }
 
 export function nightStart(roomId: string): Promise<AxiosResponse> {
-  return axios.patch(`${API_URL}/room/${roomId}/night`, null, { withCredentials: true });
+  return axios.patch(`${API_URL}/rooms/${roomId}/night`, null, { withCredentials: true });
 }
 
 export function killRequest(roomId: string, targetId: string): Promise<AxiosResponse> {
   return axios.patch(
-    `${API_URL}/room/${roomId}/kill`,
+    `${API_URL}/rooms/${roomId}/kill`,
     stringify({ targetId: targetId }),
     { withCredentials: true },
   );
@@ -20,7 +20,7 @@ export function killRequest(roomId: string, targetId: string): Promise<AxiosResp
 
 export function healRequest(roomId: string, targetId: string): Promise<AxiosResponse> {
   return axios.patch(
-    `${API_URL}/room/${roomId}/heal`,
+    `${API_URL}/rooms/${roomId}/heal`,
     stringify({ targetId: targetId }),
     { withCredentials: true },
   );
@@ -28,7 +28,7 @@ export function healRequest(roomId: string, targetId: string): Promise<AxiosResp
 
 export function checkRequest(roomId: string, targetId: string): Promise<AxiosResponse> {
   return axios.patch(
-    `${API_URL}/room/${roomId}/check`,
+    `${API_URL}/rooms/${roomId}/check`,
     stringify({ targetId: targetId }),
     { withCredentials: true },
   );
@@ -36,16 +36,16 @@ export function checkRequest(roomId: string, targetId: string): Promise<AxiosRes
 
 export function voteRequest(roomId: string, targetId: string): Promise<AxiosResponse> {
   return axios.patch(
-    `${API_URL}/room/${roomId}/vote`,
+    `${API_URL}/rooms/${roomId}/vote`,
     stringify({ targetId: targetId }),
     { withCredentials: true },
   );
 }
 
 export function endVotesRequest(roomId: string): Promise<AxiosResponse> {
-  return axios.patch(`${API_URL}/room/${roomId}/hang`, null, { withCredentials: true });
+  return axios.patch(`${API_URL}/rooms/${roomId}/hang`, null, { withCredentials: true });
 }
 
 export function skipTurnRequest(roomId: string): Promise<AxiosResponse> {
-  return axios.patch(`${API_URL}/room/${roomId}/skip`, null, { withCredentials: true });
+  return axios.patch(`${API_URL}/rooms/${roomId}/skip`, null, { withCredentials: true });
 }
