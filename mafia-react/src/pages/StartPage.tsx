@@ -10,6 +10,8 @@ import Typography from '@material-ui/core/Typography';
 import axios from 'axios';
 import { stringify } from 'querystring';
 
+import { ErrorDialog } from '../components/ErrorDialog';
+
 import { API_URL } from '../var/env';
 
 export const StartPage = () => {
@@ -18,6 +20,7 @@ export const StartPage = () => {
   const [displayName, setDisplayName] = useState<string>('');
   const [roomId, setRoomId] = useState<string>('');
   const [mafiaNum, setMafiaNum] = useState<string>('3');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   return (
     <Container maxWidth="sm">
@@ -52,10 +55,16 @@ export const StartPage = () => {
                 { withCredentials: true },
               )
               .then((data) => {
-                console.log(data, roomId, displayName);
+                history.push(`/room/${roomId}`);
+                console.log(roomId, displayName);
+              })
+              .catch((error) => {
+                console.log(error);
+                if (error.response.status >= 400) {
+                  setErrorMessage(error.response.data.message);
+                } else {
+                }
               });
-            history.push(`/room/${roomId}`);
-            console.log(roomId, displayName);
           }}
         >
           Join Room
@@ -87,6 +96,11 @@ export const StartPage = () => {
           Create Room
         </Button>
       </form>
+      <ErrorDialog
+        handleClick={() => setErrorMessage('')}
+        message={errorMessage}
+        isOpen={errorMessage !== '' ? true : false}
+      />
     </Container>
   );
 };

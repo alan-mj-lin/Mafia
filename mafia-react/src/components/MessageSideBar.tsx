@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -7,6 +7,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import Drawer from '@material-ui/core/Drawer';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
+
+import { ErrorDialog } from '../components/ErrorDialog';
 
 import spyicon from '../images/spyicon.png';
 
@@ -19,9 +21,15 @@ interface MessageType {
 
 export interface MessageSideBarProps {
   messages: MessageType[];
+  errorMessage: string;
+  handleErrorClose: () => void;
 }
 
-export const MessageSideBar = ({ messages }: MessageSideBarProps) => {
+export const MessageSideBar = ({
+  messages,
+  errorMessage,
+  handleErrorClose,
+}: MessageSideBarProps) => {
   const classes = useStyles();
   return (
     <Drawer
@@ -44,6 +52,11 @@ export const MessageSideBar = ({ messages }: MessageSideBarProps) => {
           );
         })}
       </List>
+      <ErrorDialog
+        message={errorMessage}
+        isOpen={errorMessage !== '' ? true : false}
+        handleClick={handleErrorClose}
+      />
     </Drawer>
   );
 };
