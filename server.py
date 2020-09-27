@@ -7,6 +7,7 @@ import uuid
 import random
 import string
 import logging
+import pytz
 from datetime import datetime
 from pprint import pprint
 from flask import Flask, request
@@ -19,10 +20,13 @@ from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Pla
 app = Flask(__name__, static_folder='./mafia-react/build',
             static_url_path='/')
 
+tz_TO = pytz.timezone('America/Toronto')
+
 visiting_ips = []
 
 database = []
 
+open('ip_logs.txt', 'w').close()
 write_to_logfile('Fresh Run:')
 
 LOG = create_logger(app)
@@ -65,7 +69,7 @@ LOG.info(
 def get_room_json():
     LOG.info(
         request.access_route[0] + ' requested ' + request.url)
-    check_new_ip(datetime.now().strftime(
+    check_new_ip(datetime.now(tz_TO).strftime(
         '%Y-%m-%d %H:%M:%S'), visiting_ips, request.access_route[0])
     if request.method == 'OPTIONS':
         return build_preflight_response()
@@ -270,4 +274,6 @@ def skip_turn(roomId):
 @app.route('/')
 def index():
     LOG.info(request.access_route[0] + ' requested ' + request.url)
+    check_new_ip(datetime.now(tz_TO).strftime(
+        '%Y-%m-%d %H:%M:%S'), visiting_ips, request.access_route[0])
     return app.send_static_file('index.html')
