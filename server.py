@@ -7,18 +7,23 @@ import uuid
 import random
 import string
 import logging
+from datetime import datetime
 from pprint import pprint
 from flask import Flask, request
 from flask.logging import default_handler, create_logger
 from apscheduler.schedulers.background import BackgroundScheduler
-from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false, database_clean_up
+from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false, database_clean_up, check_new_ip, write_to_logfile
 from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes, phase_shift
 from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Player
 
 app = Flask(__name__, static_folder='./mafia-react/build',
             static_url_path='/')
 
+visiting_ips = []
+
 database = []
+
+write_to_logfile('Fresh Run:')
 
 LOG = create_logger(app)
 
@@ -60,6 +65,8 @@ LOG.info(
 def get_room_json():
     LOG.info(
         request.access_route[0] + ' requested ' + request.url)
+    check_new_ip(datetime.now().strftime(
+        '%Y-%m-%d %H:%M:%S'), visiting_ips, request.access_route[0])
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'GET':
