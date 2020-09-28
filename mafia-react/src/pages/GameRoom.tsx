@@ -116,8 +116,9 @@ export const GameRoom = (props: Props) => {
           <Typography variant="h2">Game Room</Typography>
           <Grid sm={8} container className={classes.root} spacing={2}>
             {data?.data.players.map((player: PlayerType) => {
+              const isUser = player.userId === Cookies.get('userId');
               return (
-                <Grid item>
+                <Grid item data-is-user={isUser} style={{ order: isUser ? -1 : 0 }}>
                   <PlayerCard
                     name={player.name}
                     role={
@@ -137,6 +138,7 @@ export const GameRoom = (props: Props) => {
                         : false
                     }
                     status={player.status}
+                    isUser={player.userId === Cookies.get('userId')}
                     phase={data?.data.phase}
                     onKill={async (event) =>
                       await killRequest(params.roomId, player.userId).catch((err) => {

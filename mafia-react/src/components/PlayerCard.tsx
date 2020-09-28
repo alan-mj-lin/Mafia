@@ -7,6 +7,7 @@ import { red, green, grey } from '@material-ui/core/colors';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
 import spyicon from '../images/spyicon.png';
+import spyiconInverted from '../images/spyicon-inverted.png';
 
 export interface PlayerCardProps {
   name: string;
@@ -15,6 +16,7 @@ export interface PlayerCardProps {
   status: string;
   phase: string;
   checked: boolean;
+  isUser: boolean;
   onKill: (event: React.MouseEvent<unknown>) => void;
   onCheck: (event: React.MouseEvent<unknown>) => void;
   onHeal: (event: React.MouseEvent<unknown>) => void;
@@ -28,6 +30,7 @@ export const PlayerCard = ({
   status,
   phase,
   checked,
+  isUser,
   onKill,
   onHeal,
   onCheck,
@@ -43,14 +46,18 @@ export const PlayerCard = ({
     avatar = <Avatar className={classes.green}></Avatar>;
   }
   return (
-    <Card className={classes.card}>
-      <Card.Img className={classes.image} variant="top" src={spyicon} />
-      <Card.Body style={{ padding: '1rem' }}>
+    <Card className={`${classes.card} ${isUser && classes.isUser}`}>
+      <Card.Img
+        className={classes.image}
+        variant="top"
+        src={isUser ? spyicon : spyiconInverted}
+      />
+      <Card.Body className={classes.cardBody}>
         <div className={classes.infoGroup}>
           <div className={classes.infoText}>
             <Card.Title className={classes.name}>{name}</Card.Title>
             <Card.Text>
-              {role} {status}
+              {role}, {status}
             </Card.Text>
           </div>
           <div className={classes.avatar}>{avatar}</div>
@@ -117,10 +124,27 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     card: {
       width: '15rem',
+      background: 'black',
+      color: 'white',
+    },
+    isUser: {
+      background: '#cfdbff',
+      color: 'black',
+      '&::before': {
+        content: '"(You)"',
+        padding: '1rem',
+        position: 'absolute',
+        fontStyle: 'italic',
+        fontSize: '0.75em',
+        color: 'red',
+      },
     },
     image: {
       width: '10rem',
       margin: 'auto',
+    },
+    cardBody: {
+      padding: '1rem',
     },
     infoGroup: {
       display: 'grid',

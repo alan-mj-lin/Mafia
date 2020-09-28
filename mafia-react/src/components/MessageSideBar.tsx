@@ -10,9 +10,7 @@ import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
 import { ErrorDialog } from '../components/ErrorDialog';
 
-import spyicon from '../images/spyicon.png';
-
-const drawerWidth = 400;
+import spyiconInverted from '../images/spyicon-inverted.png';
 
 interface MessageType {
   primary: string;
@@ -33,21 +31,23 @@ export const MessageSideBar = ({
   const classes = useStyles();
   return (
     <Drawer
-      className={classes.drawer}
       variant="permanent"
-      classes={{
-        paper: classes.drawerPaper,
-      }}
+      className={classes.drawer}
       anchor="right"
+      style={{ border: 'none !important' }}
     >
-      <List>
+      <List className={classes.list}>
         {messages.map((message) => {
           return (
             <ListItem>
               <ListItemAvatar>
-                <Avatar src={spyicon} />
+                <Avatar src={spyiconInverted} />
               </ListItemAvatar>
-              <ListItemText primary={message.primary} secondary={message.secondary} />
+              <ListItemText
+                primary={message.primary}
+                secondary={message.secondary}
+                classes={{ secondary: classes.secondaryText }}
+              />
             </ListItem>
           );
         })}
@@ -63,22 +63,17 @@ export const MessageSideBar = ({
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      flexGrow: 1,
-    },
-    paper: {
-      height: 140,
-      width: 100,
-    },
-    control: {
-      padding: theme.spacing(2),
-    },
     drawer: {
-      width: drawerWidth,
-      flexShrink: 0,
+      width: 400,
+      border: 'none',
     },
-    drawerPaper: {
-      width: drawerWidth,
+    list: {
+      flexShrink: 0,
+      background: 'black',
+      color: 'white',
+    },
+    secondaryText: {
+      color: 'lightgrey',
     },
   }),
 );
