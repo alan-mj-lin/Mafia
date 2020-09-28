@@ -54,13 +54,13 @@ export const PlayerCard = ({
       />
       <Card.Body className={classes.cardBody}>
         <div className={classes.infoGroup}>
+          <div className={classes.avatar}>{avatar}</div>
           <div className={classes.infoText}>
             <Card.Title className={classes.name}>{name}</Card.Title>
             <Card.Text>
               {role}, {status}
             </Card.Text>
           </div>
-          <div className={classes.avatar}>{avatar}</div>
         </div>
         <hr></hr>
         <ButtonGroup>
@@ -132,32 +132,37 @@ const useStyles = makeStyles((theme: Theme) =>
       color: 'black',
       '&::before': {
         content: '"(You)"',
-        padding: '1rem',
+        padding: '0.5rem',
         position: 'absolute',
+        top: '-1px',
+        right: '-1px',
         fontStyle: 'italic',
-        fontSize: '0.75em',
-        color: 'red',
+        background: 'red',
+        color: 'yellow',
+        borderRadius: '0 0.25rem 0 0.25rem',
       },
     },
     image: {
-      width: '10rem',
+      width: '6rem',
       margin: 'auto',
+      marginTop: '-1rem',
     },
     cardBody: {
       padding: '1rem',
     },
     infoGroup: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, 50%)',
+      gridTemplateColumns: '1fr 3fr',
     },
     infoText: {
       margin: 'auto',
+      overflowWrap: 'anywhere',
     },
     name: {
       overflowWrap: 'anywhere',
     },
     avatar: {
-      padding: '1rem',
+      padding: '1rem 0 0.25rem 1rem',
     },
     actionButton: {
       fontSize: '12px',

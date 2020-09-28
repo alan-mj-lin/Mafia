@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { createStyles, makeStyles, withStyles, Theme } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
@@ -26,14 +26,14 @@ export const StartPage = () => {
     <Container maxWidth="sm">
       <Typography variant="h2">Mafia</Typography>
       <form className={classes.root} noValidate autoComplete="off">
-        <TextField
+        <StyledTextField
           id="gamename"
           onChange={(event) => {
             setDisplayName(event.target.value);
           }}
           label="Display Name"
         />
-        <TextField
+        <StyledTextField
           id="room"
           onChange={(event) => {
             setRoomId(event.target.value);
@@ -70,7 +70,7 @@ export const StartPage = () => {
           Join Room
         </Button>
         <br />
-        <TextField
+        <StyledTextField
           id="mafia"
           value={mafiaNum}
           onChange={(event) => {
@@ -112,5 +112,23 @@ const useStyles = makeStyles((theme: Theme) =>
         margin: theme.spacing(1),
       },
     },
+    textField: {
+      color: 'white',
+    },
   }),
 );
+
+const StyledTextField = withStyles({
+  root: {
+    color: 'white',
+    '& label.Mui-focused': {
+      color: 'white',
+    },
+    '& label': {
+      color: 'lightgrey',
+    },
+    '& input': {
+      color: 'yellow',
+    },
+  },
+})(TextField);

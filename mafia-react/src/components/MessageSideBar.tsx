@@ -66,6 +66,8 @@ const useStyles = makeStyles((theme: Theme) =>
     drawer: {
       width: 400,
       border: 'none',
+      background: 'black',
+      color: 'white',
     },
     list: {
       flexShrink: 0,

@@ -113,7 +113,12 @@ export const GameRoom = (props: Props) => {
             playerData={playerData}
             roomId={params.roomId}
           />
-          <Typography variant="h2">Game Room</Typography>
+          <Typography variant="h2">
+            Game Room
+            {data?.data.roomMaster === Cookies.get('userId') && (
+              <span className={classes.headerNote}> - You are room master!</span>
+            )}
+          </Typography>
           <Grid sm={8} container className={classes.root} spacing={2}>
             {data?.data.players.map((player: PlayerType) => {
               const isUser = player.userId === Cookies.get('userId');
@@ -256,6 +261,12 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       flexGrow: 1,
+    },
+    headerNote: {
+      fontSize: '0.5em',
+      verticalAlign: 'middle',
+      fontStyle: 'italic',
+      color: 'red',
     },
     paper: {
       height: 140,
