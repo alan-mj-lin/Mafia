@@ -285,7 +285,7 @@ export const GameRoom = (props: Props) => {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      flexGrow: 1,
+      width: '80vw',
     },
     headerNote: {
       fontSize: '0.5em',

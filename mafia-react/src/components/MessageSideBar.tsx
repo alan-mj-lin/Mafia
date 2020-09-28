@@ -59,12 +59,12 @@ export const MessageSideBar = ({
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     drawer: {
-      width: 400,
       border: 'none',
       background: 'black',
       color: 'white',
     },
     list: {
+      width: '18vw',
       flexShrink: 0,
       background: 'black',
       color: 'white',
