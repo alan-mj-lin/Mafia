@@ -79,7 +79,7 @@ export const GameRoom = (props: Props) => {
       const room = await axios.get(`${API_URL}/room?roomId=${params.roomId}`, {
         withCredentials: true,
       });
-
+      room.data.gameMessages = room.data.gameMessages.reverse();
       // console.log(room);
       return room;
     },
@@ -87,6 +87,12 @@ export const GameRoom = (props: Props) => {
       refetchInterval: 2000,
     },
   );
+  function showErrorMessage(message: string, delayToHide: number = 2000) {
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage('');
+    }, delayToHide);
+  }
   const playerData = data?.data.players.find(
     (player: PlayerType) => player.userId === Cookies.get('userId'),
   );
@@ -120,10 +126,15 @@ export const GameRoom = (props: Props) => {
             )}
           </Typography>
           <Grid sm={8} container className={classes.root} spacing={2}>
-            {data?.data.players.map((player: PlayerType) => {
+            {data?.data.players.map((player: PlayerType, index: number) => {
               const isUser = player.userId === Cookies.get('userId');
               return (
-                <Grid item data-is-user={isUser} style={{ order: isUser ? -1 : 0 }}>
+                <Grid
+                  item
+                  key={index}
+                  data-is-user={isUser}
+                  style={{ order: isUser ? -1 : 0 }}
+                >
                   <PlayerCard
                     name={player.name}
                     role={
@@ -148,25 +159,25 @@ export const GameRoom = (props: Props) => {
                     onKill={async (event) =>
                       await killRequest(params.roomId, player.userId).catch((err) => {
                         if (err.response.status >= 400)
-                          setErrorMessage(err.response.data.message);
+                          showErrorMessage(err.response.data.message);
                       })
                     }
                     onHeal={async (event) =>
                       await healRequest(params.roomId, player.userId).catch((err) => {
                         if (err.response.status >= 400)
-                          setErrorMessage(err.response.data.message);
+                          showErrorMessage(err.response.data.message);
                       })
                     }
                     onCheck={async (event) =>
                       await checkRequest(params.roomId, player.userId).catch((err) => {
                         if (err.response.status >= 400)
-                          setErrorMessage(err.response.data.message);
+                          showErrorMessage(err.response.data.message);
                       })
                     }
                     onHang={async (event) =>
                       await voteRequest(params.roomId, player.userId).catch((err) => {
                         if (err.response.status >= 400)
-                          setErrorMessage(err.response.data.message);
+                          showErrorMessage(err.response.data.message);
                       })
                     }
                   />
@@ -195,7 +206,7 @@ export const GameRoom = (props: Props) => {
                     onClick={async () =>
                       await skipTurnRequest(params.roomId).catch((error) => {
                         if (error.response.status >= 400)
-                          setErrorMessage(error.response.data.message);
+                          showErrorMessage(error.response.data.message);
                       })
                     }
                   >
@@ -210,7 +221,7 @@ export const GameRoom = (props: Props) => {
                     onClick={async () =>
                       await endVotesRequest(params.roomId).catch((error) => {
                         if (error.response.status >= 400)
-                          setErrorMessage(error.response.data.message);
+                          showErrorMessage(error.response.data.message);
                       })
                     }
                   >
@@ -225,7 +236,7 @@ export const GameRoom = (props: Props) => {
                     onClick={async () =>
                       await nightStart(params.roomId).catch((err) => {
                         if (err.response.status >= 400)
-                          setErrorMessage(err.response.data.message);
+                          showErrorMessage(err.response.data.message);
                       })
                     }
                   >
@@ -240,7 +251,7 @@ export const GameRoom = (props: Props) => {
                     onClick={async () =>
                       await gameStart(params.roomId).catch((error) => {
                         if (error.response.status >= 400)
-                          setErrorMessage(error.response.data.message);
+                          showErrorMessage(error.response.data.message);
                       })
                     }
                   >

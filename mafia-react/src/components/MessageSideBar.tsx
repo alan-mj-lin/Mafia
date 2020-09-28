@@ -30,16 +30,16 @@ export const MessageSideBar = ({
 }: MessageSideBarProps) => {
   const classes = useStyles();
   return (
-    <Drawer
-      variant="permanent"
-      className={classes.drawer}
-      anchor="right"
-      style={{ border: 'none !important' }}
-    >
+    <Drawer variant="permanent" className={classes.drawer} anchor="right">
+      <ErrorDialog
+        message={errorMessage}
+        isOpen={errorMessage !== '' ? true : false}
+        handleClick={handleErrorClose}
+      />
       <List className={classes.list}>
-        {messages.map((message) => {
+        {messages.map((message, index) => {
           return (
-            <ListItem>
+            <ListItem key={index}>
               <ListItemAvatar>
                 <Avatar src={spyiconInverted} />
               </ListItemAvatar>
@@ -52,11 +52,6 @@ export const MessageSideBar = ({
           );
         })}
       </List>
-      <ErrorDialog
-        message={errorMessage}
-        isOpen={errorMessage !== '' ? true : false}
-        handleClick={handleErrorClose}
-      />
     </Drawer>
   );
 };

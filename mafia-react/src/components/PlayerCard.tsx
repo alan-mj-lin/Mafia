@@ -153,6 +153,7 @@ const useStyles = makeStyles((theme: Theme) =>
     infoGroup: {
       display: 'grid',
       gridTemplateColumns: '1fr 3fr',
+      gridGap: '1em',
     },
     infoText: {
       margin: 'auto',
