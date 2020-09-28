@@ -131,7 +131,7 @@ export const GameRoom = (props: Props) => {
               <span className={classes.headerNote}> - You are room master!</span>
             )}
           </Typography>
-          <Grid sm={8} container className={classes.root} spacing={2}>
+          <Grid container className={classes.root} spacing={2}>
             {data?.data.players.map((player: PlayerType, index: number) => {
               const isUser = player.userId === Cookies.get('userId');
               return (
