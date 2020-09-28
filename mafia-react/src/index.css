@@ -5,6 +5,11 @@ body {
   color: white;
 }
 
+body[data-is-night='true'] {
+  background: black;
+  color: yellow;
+}
+
 ol,
 ul {
   padding-left: 30px;

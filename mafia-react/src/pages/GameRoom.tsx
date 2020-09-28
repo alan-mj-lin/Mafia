@@ -19,6 +19,7 @@ import { stringify } from 'querystring';
 import { PlayerCard } from '../components/PlayerCard';
 import { MessageSideBar } from '../components/MessageSideBar';
 import { ErrorDialog } from '../components/ErrorDialog';
+import { styleDay, styleNight } from '../helpers/DayAndNight';
 
 import {
   gameStart,
@@ -80,6 +81,11 @@ export const GameRoom = (props: Props) => {
         withCredentials: true,
       });
       room.data.gameMessages = room.data.gameMessages.reverse();
+      if (room.data.phase === 'voting') {
+        styleDay();
+      } else {
+        styleNight();
+      }
       // console.log(room);
       return room;
     },
@@ -204,10 +210,14 @@ export const GameRoom = (props: Props) => {
                     variant="contained"
                     disabled={Cookies.get('userId') !== data?.data.roomMaster}
                     onClick={async () =>
-                      await skipTurnRequest(params.roomId).catch((error) => {
-                        if (error.response.status >= 400)
-                          showErrorMessage(error.response.data.message);
-                      })
+                      await skipTurnRequest(params.roomId)
+                        .then(() => {
+                          if (data?.data.phase === 'voting') styleDay();
+                        })
+                        .catch((error) => {
+                          if (error.response.status >= 400)
+                            showErrorMessage(error.response.data.message);
+                        })
                     }
                   >
                     Skip Turn
@@ -234,10 +244,12 @@ export const GameRoom = (props: Props) => {
                       data?.data.phase !== 'voting'
                     }
                     onClick={async () =>
-                      await nightStart(params.roomId).catch((err) => {
-                        if (err.response.status >= 400)
-                          showErrorMessage(err.response.data.message);
-                      })
+                      await nightStart(params.roomId)
+                        .then(styleNight)
+                        .catch((err) => {
+                          if (err.response.status >= 400)
+                            showErrorMessage(err.response.data.message);
+                        })
                     }
                   >
                     Start Night
@@ -249,10 +261,12 @@ export const GameRoom = (props: Props) => {
                       data?.data.status !== 'pre-game'
                     }
                     onClick={async () =>
-                      await gameStart(params.roomId).catch((error) => {
-                        if (error.response.status >= 400)
-                          showErrorMessage(error.response.data.message);
-                      })
+                      await gameStart(params.roomId)
+                        .then(styleDay)
+                        .catch((error) => {
+                          if (error.response.status >= 400)
+                            showErrorMessage(error.response.data.message);
+                        })
                     }
                   >
                     Start Game
