@@ -1,13 +1,6 @@
 body {
   font: 14px 'Century Gothic', Futura, sans-serif;
   margin: 20px;
-  background: #333;
-  color: white;
-}
-
-body[data-is-night='true'] {
-  background: black;
-  color: yellow;
 }
 
 ol,
@@ -55,4 +48,36 @@ ul {
 
 .game-info {
   margin-left: 20px;
+}
+
+body {
+  background: #333;
+  color: white;
+  transition: background 1s, color 1s;
+}
+
+.card {
+  transition: background 1s, color 1s;
+}
+
+body[data-is-night='true'] {
+  background: black;
+  color: yellow;
+  animation: night-fall 2s forwards;
+}
+
+body[data-is-night='true'] [data-is-user='false'] .card {
+  background: black;
+  color: yellow;
+}
+
+body[data-is-night='false'] [data-is-user='false'] .card {
+  background: white;
+  color: black;
+}
+
+@keyframes night-fall {
+  50% {
+    opacity: 0;
+  }
 }

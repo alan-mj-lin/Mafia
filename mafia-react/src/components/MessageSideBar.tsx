@@ -10,6 +10,7 @@ import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
 import { ErrorDialog } from '../components/ErrorDialog';
 
+import spyicon from '../images/spyicon.png';
 import spyiconInverted from '../images/spyicon-inverted.png';
 
 interface MessageType {
@@ -21,14 +22,17 @@ export interface MessageSideBarProps {
   messages: MessageType[];
   errorMessage: string;
   handleErrorClose: () => void;
+  phase: string;
 }
 
 export const MessageSideBar = ({
   messages,
   errorMessage,
   handleErrorClose,
+  phase,
 }: MessageSideBarProps) => {
   const classes = useStyles();
+  const isDay = phase === 'voting';
   return (
     <Drawer variant="permanent" className={classes.drawer} anchor="right">
       <ErrorDialog
@@ -36,18 +40,22 @@ export const MessageSideBar = ({
         isOpen={errorMessage !== '' ? true : false}
         handleClick={handleErrorClose}
       />
-      <List className={classes.list}>
+      <List className={`${classes.list} ${isDay && classes.isDay}`}>
         {messages.map((message, index) => {
           return (
             <ListItem key={index}>
               <ListItemAvatar>
-                <Avatar src={spyiconInverted} />
+                <Avatar src={isDay ? spyicon : spyiconInverted} />
               </ListItemAvatar>
-              <ListItemText
-                primary={message.primary}
-                secondary={message.secondary}
-                classes={{ secondary: classes.secondaryText }}
-              />
+              {isDay ? (
+                <ListItemText primary={message.primary} secondary={message.secondary} />
+              ) : (
+                <ListItemText
+                  primary={message.primary}
+                  secondary={message.secondary}
+                  classes={{ secondary: classes.secondaryText }}
+                />
+              )}
             </ListItem>
           );
         })}
@@ -71,6 +79,13 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     secondaryText: {
       color: 'lightgrey',
+    },
+    secondaryTextDay: {
+      color: 'black',
+    },
+    isDay: {
+      background: 'white',
+      color: 'black',
     },
   }),
 );

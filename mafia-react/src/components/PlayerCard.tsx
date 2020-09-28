@@ -45,12 +45,13 @@ export const PlayerCard = ({
   } else if (checked && trueRole !== 'mafia') {
     avatar = <Avatar className={classes.green}></Avatar>;
   }
+  const isDay = phase === 'voting';
   return (
     <Card className={`${classes.card} ${isUser && classes.isUser}`}>
       <Card.Img
         className={classes.image}
         variant="top"
-        src={isUser ? spyicon : spyiconInverted}
+        src={isUser || isDay ? spyicon : spyiconInverted}
       />
       <Card.Body className={classes.cardBody}>
         <div className={classes.infoGroup}>

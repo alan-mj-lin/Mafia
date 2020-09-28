@@ -200,6 +200,7 @@ export const GameRoom = (props: Props) => {
             }
             errorMessage={errorMessage}
             handleErrorClose={() => setErrorMessage('')}
+            phase={data?.data.phase}
           />
 
           <HideOnScroll {...props}>
