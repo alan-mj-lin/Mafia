@@ -12,7 +12,7 @@ import { ErrorDialog } from '../components/ErrorDialog';
 
 import spyicon from '../images/spyicon.png';
 
-const drawerWidth = 500;
+const drawerWidth = 400;
 
 interface MessageType {
   primary: string;

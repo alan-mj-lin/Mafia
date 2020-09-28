@@ -34,20 +34,31 @@ export const PlayerCard = ({
   onHang,
 }: PlayerCardProps) => {
   const classes = useStyles();
+  let avatar;
+  if (!checked) {
+    avatar = <Avatar className={classes.grey}></Avatar>;
+  } else if (checked && trueRole === 'mafia') {
+    avatar = <Avatar className={classes.red}></Avatar>;
+  } else if (checked && trueRole !== 'mafia') {
+    avatar = <Avatar className={classes.green}></Avatar>;
+  }
   return (
-    <Card style={{ width: '18rem' }}>
-      <Card.Img variant="top" src={spyicon} />
-      <Card.Body>
-        <Card.Title>{name}</Card.Title>
-        <Card.Text>{role}</Card.Text>
-        <Card.Text>{status}</Card.Text>
-
-        {checked && trueRole === 'mafia' && <Avatar className={classes.red}></Avatar>}
-        {checked && trueRole !== 'mafia' && <Avatar className={classes.green}></Avatar>}
-        {!checked && <Avatar className={classes.grey}></Avatar>}
+    <Card className={classes.card}>
+      <Card.Img className={classes.image} variant="top" src={spyicon} />
+      <Card.Body style={{ padding: '1rem' }}>
+        <div className={classes.infoGroup}>
+          <div className={classes.infoText}>
+            <Card.Title className={classes.name}>{name}</Card.Title>
+            <Card.Text>
+              {role} {status}
+            </Card.Text>
+          </div>
+          <div className={classes.avatar}>{avatar}</div>
+        </div>
         <hr></hr>
         <ButtonGroup>
           <Button
+            className={classes.actionButton}
             variant="primary"
             disabled={phase !== 'mafia'}
             onClick={(event) => onKill(event)}
@@ -55,6 +66,7 @@ export const PlayerCard = ({
             Kill
           </Button>
           <Button
+            className={classes.actionButton}
             variant="primary"
             disabled={phase !== 'detective'}
             onClick={(event) => onCheck(event)}
@@ -62,6 +74,7 @@ export const PlayerCard = ({
             Check
           </Button>
           <Button
+            className={classes.actionButton}
             variant="primary"
             disabled={phase !== 'doctor'}
             onClick={(event) => onHeal(event)}
@@ -69,6 +82,7 @@ export const PlayerCard = ({
             Heal
           </Button>
           <Button
+            className={classes.actionButton}
             variant="primary"
             disabled={phase !== 'voting'}
             onClick={(event) => onHang(event)}
@@ -100,6 +114,29 @@ const useStyles = makeStyles((theme: Theme) =>
     grey: {
       color: theme.palette.getContrastText(grey[500]),
       backgroundColor: grey[500],
+    },
+    card: {
+      width: '15rem',
+    },
+    image: {
+      width: '10rem',
+      margin: 'auto',
+    },
+    infoGroup: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, 50%)',
+    },
+    infoText: {
+      margin: 'auto',
+    },
+    name: {
+      overflowWrap: 'anywhere',
+    },
+    avatar: {
+      padding: '1rem',
+    },
+    actionButton: {
+      fontSize: '12px',
     },
   }),
 );
