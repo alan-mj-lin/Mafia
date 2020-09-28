@@ -11,8 +11,7 @@ import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import { ErrorDialog } from '../components/ErrorDialog';
 
 import spyicon from '../images/spyicon.png';
-
-const drawerWidth = 500;
+import spyiconInverted from '../images/spyicon-inverted.png';
 
 interface MessageType {
   primary: string;
@@ -23,62 +22,70 @@ export interface MessageSideBarProps {
   messages: MessageType[];
   errorMessage: string;
   handleErrorClose: () => void;
+  phase: string;
 }
 
 export const MessageSideBar = ({
   messages,
   errorMessage,
   handleErrorClose,
+  phase,
 }: MessageSideBarProps) => {
   const classes = useStyles();
+  const isDay = phase === 'voting';
   return (
-    <Drawer
-      className={classes.drawer}
-      variant="permanent"
-      classes={{
-        paper: classes.drawerPaper,
-      }}
-      anchor="right"
-    >
-      <List>
-        {messages.map((message) => {
-          return (
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar src={spyicon} />
-              </ListItemAvatar>
-              <ListItemText primary={message.primary} secondary={message.secondary} />
-            </ListItem>
-          );
-        })}
-      </List>
+    <Drawer variant="permanent" className={classes.drawer} anchor="right">
       <ErrorDialog
         message={errorMessage}
         isOpen={errorMessage !== '' ? true : false}
         handleClick={handleErrorClose}
       />
+      <List className={`${classes.list} ${isDay && classes.isDay}`}>
+        {messages.map((message, index) => {
+          return (
+            <ListItem key={index}>
+              <ListItemAvatar>
+                <Avatar src={isDay ? spyicon : spyiconInverted} />
+              </ListItemAvatar>
+              {isDay ? (
+                <ListItemText primary={message.primary} secondary={message.secondary} />
+              ) : (
+                <ListItemText
+                  primary={message.primary}
+                  secondary={message.secondary}
+                  classes={{ secondary: classes.secondaryText }}
+                />
+              )}
+            </ListItem>
+          );
+        })}
+      </List>
     </Drawer>
   );
 };
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      flexGrow: 1,
-    },
-    paper: {
-      height: 140,
-      width: 100,
-    },
-    control: {
-      padding: theme.spacing(2),
-    },
     drawer: {
-      width: drawerWidth,
-      flexShrink: 0,
+      border: 'none',
+      background: 'black',
+      color: 'white',
     },
-    drawerPaper: {
-      width: drawerWidth,
+    list: {
+      width: '18vw',
+      flexShrink: 0,
+      background: 'black',
+      color: 'white',
+    },
+    secondaryText: {
+      color: 'lightgrey',
+    },
+    secondaryTextDay: {
+      color: 'black',
+    },
+    isDay: {
+      background: 'white',
+      color: 'black',
     },
   }),
 );
