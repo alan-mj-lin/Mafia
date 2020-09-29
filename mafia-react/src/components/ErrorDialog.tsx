@@ -43,7 +43,11 @@ export const ErrorDialog = ({ isOpen, message, handleClick }: ErrorDialogProps) 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      width: '100%',
+      zIndex: 9999,
+      width: '18vw',
+      position: 'fixed',
+      right: '0',
+      bottom: '0',
       '& > * + *': {
         marginTop: theme.spacing(2),
       },

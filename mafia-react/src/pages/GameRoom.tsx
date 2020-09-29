@@ -80,7 +80,6 @@ export const GameRoom = (props: Props) => {
       const room = await axios.get(`${API_URL}/room?roomId=${params.roomId}`, {
         withCredentials: true,
       });
-      room.data.gameMessages = room.data.gameMessages.reverse();
       if (room.data.phase === 'voting') {
         styleDay();
       } else {
@@ -93,7 +92,7 @@ export const GameRoom = (props: Props) => {
       refetchInterval: 2000,
     },
   );
-  function showErrorMessage(message: string, delayToHide: number = 2000) {
+  function showErrorMessage(message: string, delayToHide: number = 5000) {
     setErrorMessage(message);
     setTimeout(() => {
       setErrorMessage('');
