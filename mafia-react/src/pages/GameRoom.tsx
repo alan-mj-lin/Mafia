@@ -92,7 +92,7 @@ export const GameRoom = (props: Props) => {
       refetchInterval: 2000,
     },
   );
-  function showErrorMessage(message: string, delayToHide: number = 2000) {
+  function showErrorMessage(message: string, delayToHide: number = 5000) {
     setErrorMessage(message);
     setTimeout(() => {
       setErrorMessage('');
