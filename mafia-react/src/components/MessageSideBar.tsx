@@ -8,8 +8,6 @@ import Avatar from '@material-ui/core/Avatar';
 import Drawer from '@material-ui/core/Drawer';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
-import { ErrorDialog } from '../components/ErrorDialog';
-
 import spyicon from '../images/spyicon.png';
 import spyiconInverted from '../images/spyicon-inverted.png';
 
@@ -20,26 +18,14 @@ interface MessageType {
 
 export interface MessageSideBarProps {
   messages: MessageType[];
-  errorMessage: string;
-  handleErrorClose: () => void;
   phase: string;
 }
 
-export const MessageSideBar = ({
-  messages,
-  errorMessage,
-  handleErrorClose,
-  phase,
-}: MessageSideBarProps) => {
+export const MessageSideBar = ({ messages, phase }: MessageSideBarProps) => {
   const classes = useStyles();
   const isDay = phase === 'voting';
   return (
     <Drawer variant="permanent" className={classes.drawer} anchor="right">
-      <ErrorDialog
-        message={errorMessage}
-        isOpen={errorMessage !== '' ? true : false}
-        handleClick={handleErrorClose}
-      />
       <List className={`${classes.list} ${isDay && classes.isDay}`}>
         {messages.map((message, index) => {
           return (

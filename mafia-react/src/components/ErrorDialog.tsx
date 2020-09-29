@@ -45,9 +45,9 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       zIndex: 9999,
       width: '18vw',
-      position: 'fixed',
-      right: '0',
-      bottom: '0',
+      position: 'relative',
+      margin: 'auto',
+      top: '30vh',
       '& > * + *': {
         marginTop: theme.spacing(2),
       },

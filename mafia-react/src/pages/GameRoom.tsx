@@ -197,9 +197,13 @@ export const GameRoom = (props: Props) => {
                 ? data?.data.gameMessages
                 : data?.data.observerMessages
             }
-            errorMessage={errorMessage}
-            handleErrorClose={() => setErrorMessage('')}
             phase={data?.data.phase}
+          />
+
+          <ErrorDialog
+            message={errorMessage}
+            isOpen={errorMessage !== '' ? true : false}
+            handleClick={() => setErrorMessage('')}
           />
 
           <HideOnScroll {...props}>
