@@ -76,6 +76,10 @@ body[data-is-night='false'] [data-is-user='false'] .card {
   color: black;
 }
 
+#transition-modal-title {
+  color: black;
+}
+
 @keyframes night-fall {
   50% {
     opacity: 0;
