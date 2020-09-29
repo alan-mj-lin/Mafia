@@ -97,6 +97,7 @@ export const StartPage = () => {
         </Button>
       </form>
       <ErrorDialog
+        isStartPage={true}
         handleClick={() => setErrorMessage('')}
         message={errorMessage}
         isOpen={errorMessage !== '' ? true : false}
