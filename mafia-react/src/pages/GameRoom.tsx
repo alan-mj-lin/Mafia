@@ -19,6 +19,7 @@ import { stringify } from 'querystring';
 import { PlayerCard } from '../components/PlayerCard';
 import { MessageSideBar } from '../components/MessageSideBar';
 import { ErrorDialog } from '../components/ErrorDialog';
+import { styleDay, styleNight } from '../helpers/DayAndNight';
 
 import {
   gameStart,
@@ -79,7 +80,11 @@ export const GameRoom = (props: Props) => {
       const room = await axios.get(`${API_URL}/room?roomId=${params.roomId}`, {
         withCredentials: true,
       });
-
+      if (room.data.phase === 'voting') {
+        styleDay();
+      } else {
+        styleNight();
+      }
       // console.log(room);
       return room;
     },
@@ -87,6 +92,12 @@ export const GameRoom = (props: Props) => {
       refetchInterval: 2000,
     },
   );
+  function showErrorMessage(message: string, delayToHide: number = 5000) {
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage('');
+    }, delayToHide);
+  }
   const playerData = data?.data.players.find(
     (player: PlayerType) => player.userId === Cookies.get('userId'),
   );
@@ -113,11 +124,22 @@ export const GameRoom = (props: Props) => {
             playerData={playerData}
             roomId={params.roomId}
           />
-          <Typography variant="h2">Game Room</Typography>
-          <Grid sm={8} container className={classes.root} spacing={2}>
-            {data?.data.players.map((player: PlayerType) => {
+          <Typography variant="h2">
+            Game Room
+            {data?.data.roomMaster === Cookies.get('userId') && (
+              <span className={classes.headerNote}> - You are room master!</span>
+            )}
+          </Typography>
+          <Grid container className={classes.root} spacing={2}>
+            {data?.data.players.map((player: PlayerType, index: number) => {
+              const isUser = player.userId === Cookies.get('userId');
               return (
-                <Grid item>
+                <Grid
+                  item
+                  key={index}
+                  data-is-user={isUser}
+                  style={{ order: isUser ? -1 : 0 }}
+                >
                   <PlayerCard
                     name={player.name}
                     role={
@@ -137,29 +159,30 @@ export const GameRoom = (props: Props) => {
                         : false
                     }
                     status={player.status}
+                    isUser={player.userId === Cookies.get('userId')}
                     phase={data?.data.phase}
                     onKill={async (event) =>
                       await killRequest(params.roomId, player.userId).catch((err) => {
                         if (err.response.status >= 400)
-                          setErrorMessage(err.response.data.message);
+                          showErrorMessage(err.response.data.message);
                       })
                     }
                     onHeal={async (event) =>
                       await healRequest(params.roomId, player.userId).catch((err) => {
                         if (err.response.status >= 400)
-                          setErrorMessage(err.response.data.message);
+                          showErrorMessage(err.response.data.message);
                       })
                     }
                     onCheck={async (event) =>
                       await checkRequest(params.roomId, player.userId).catch((err) => {
                         if (err.response.status >= 400)
-                          setErrorMessage(err.response.data.message);
+                          showErrorMessage(err.response.data.message);
                       })
                     }
                     onHang={async (event) =>
                       await voteRequest(params.roomId, player.userId).catch((err) => {
                         if (err.response.status >= 400)
-                          setErrorMessage(err.response.data.message);
+                          showErrorMessage(err.response.data.message);
                       })
                     }
                   />
@@ -176,6 +199,7 @@ export const GameRoom = (props: Props) => {
             }
             errorMessage={errorMessage}
             handleErrorClose={() => setErrorMessage('')}
+            phase={data?.data.phase}
           />
 
           <HideOnScroll {...props}>
@@ -186,10 +210,14 @@ export const GameRoom = (props: Props) => {
                     variant="contained"
                     disabled={Cookies.get('userId') !== data?.data.roomMaster}
                     onClick={async () =>
-                      await skipTurnRequest(params.roomId).catch((error) => {
-                        if (error.response.status >= 400)
-                          setErrorMessage(error.response.data.message);
-                      })
+                      await skipTurnRequest(params.roomId)
+                        .then(() => {
+                          if (data?.data.phase === 'voting') styleDay();
+                        })
+                        .catch((error) => {
+                          if (error.response.status >= 400)
+                            showErrorMessage(error.response.data.message);
+                        })
                     }
                   >
                     Skip Turn
@@ -203,7 +231,7 @@ export const GameRoom = (props: Props) => {
                     onClick={async () =>
                       await endVotesRequest(params.roomId).catch((error) => {
                         if (error.response.status >= 400)
-                          setErrorMessage(error.response.data.message);
+                          showErrorMessage(error.response.data.message);
                       })
                     }
                   >
@@ -216,10 +244,12 @@ export const GameRoom = (props: Props) => {
                       data?.data.phase !== 'voting'
                     }
                     onClick={async () =>
-                      await nightStart(params.roomId).catch((err) => {
-                        if (err.response.status >= 400)
-                          setErrorMessage(err.response.data.message);
-                      })
+                      await nightStart(params.roomId)
+                        .then(styleNight)
+                        .catch((err) => {
+                          if (err.response.status >= 400)
+                            showErrorMessage(err.response.data.message);
+                        })
                     }
                   >
                     Start Night
@@ -231,10 +261,12 @@ export const GameRoom = (props: Props) => {
                       data?.data.status !== 'pre-game'
                     }
                     onClick={async () =>
-                      await gameStart(params.roomId).catch((error) => {
-                        if (error.response.status >= 400)
-                          setErrorMessage(error.response.data.message);
-                      })
+                      await gameStart(params.roomId)
+                        .then(styleDay)
+                        .catch((error) => {
+                          if (error.response.status >= 400)
+                            showErrorMessage(error.response.data.message);
+                        })
                     }
                   >
                     Start Game
@@ -253,7 +285,13 @@ export const GameRoom = (props: Props) => {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      flexGrow: 1,
+      width: '80vw',
+    },
+    headerNote: {
+      fontSize: '0.5em',
+      verticalAlign: 'middle',
+      fontStyle: 'italic',
+      color: 'red',
     },
     paper: {
       height: 140,

@@ -7,6 +7,7 @@ import { red, green, grey } from '@material-ui/core/colors';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
 import spyicon from '../images/spyicon.png';
+import spyiconInverted from '../images/spyicon-inverted.png';
 
 export interface PlayerCardProps {
   name: string;
@@ -15,6 +16,7 @@ export interface PlayerCardProps {
   status: string;
   phase: string;
   checked: boolean;
+  isUser: boolean;
   onKill: (event: React.MouseEvent<unknown>) => void;
   onCheck: (event: React.MouseEvent<unknown>) => void;
   onHeal: (event: React.MouseEvent<unknown>) => void;
@@ -28,26 +30,43 @@ export const PlayerCard = ({
   status,
   phase,
   checked,
+  isUser,
   onKill,
   onHeal,
   onCheck,
   onHang,
 }: PlayerCardProps) => {
   const classes = useStyles();
+  let avatar;
+  if (!checked) {
+    avatar = <Avatar className={classes.grey}></Avatar>;
+  } else if (checked && trueRole === 'mafia') {
+    avatar = <Avatar className={classes.red}></Avatar>;
+  } else if (checked && trueRole !== 'mafia') {
+    avatar = <Avatar className={classes.green}></Avatar>;
+  }
+  const isDay = phase === 'voting';
   return (
-    <Card style={{ width: '18rem' }}>
-      <Card.Img variant="top" src={spyicon} />
-      <Card.Body>
-        <Card.Title>{name}</Card.Title>
-        <Card.Text>{role}</Card.Text>
-        <Card.Text>{status}</Card.Text>
-
-        {checked && trueRole === 'mafia' && <Avatar className={classes.red}></Avatar>}
-        {checked && trueRole !== 'mafia' && <Avatar className={classes.green}></Avatar>}
-        {!checked && <Avatar className={classes.grey}></Avatar>}
+    <Card className={`${classes.card} ${isUser && classes.isUser}`}>
+      <Card.Img
+        className={classes.image}
+        variant="top"
+        src={isUser || isDay ? spyicon : spyiconInverted}
+      />
+      <Card.Body className={classes.cardBody}>
+        <div className={classes.infoGroup}>
+          <div className={classes.avatar}>{avatar}</div>
+          <div className={classes.infoText}>
+            <Card.Title className={classes.name}>{name}</Card.Title>
+            <Card.Text>
+              {role}, {status}
+            </Card.Text>
+          </div>
+        </div>
         <hr></hr>
         <ButtonGroup>
           <Button
+            className={classes.actionButton}
             variant="primary"
             disabled={phase !== 'mafia'}
             onClick={(event) => onKill(event)}
@@ -55,6 +74,7 @@ export const PlayerCard = ({
             Kill
           </Button>
           <Button
+            className={classes.actionButton}
             variant="primary"
             disabled={phase !== 'detective'}
             onClick={(event) => onCheck(event)}
@@ -62,6 +82,7 @@ export const PlayerCard = ({
             Check
           </Button>
           <Button
+            className={classes.actionButton}
             variant="primary"
             disabled={phase !== 'doctor'}
             onClick={(event) => onHeal(event)}
@@ -69,6 +90,7 @@ export const PlayerCard = ({
             Heal
           </Button>
           <Button
+            className={classes.actionButton}
             variant="primary"
             disabled={phase !== 'voting'}
             onClick={(event) => onHang(event)}
@@ -100,6 +122,52 @@ const useStyles = makeStyles((theme: Theme) =>
     grey: {
       color: theme.palette.getContrastText(grey[500]),
       backgroundColor: grey[500],
+    },
+    card: {
+      width: '15rem',
+      background: 'black',
+      color: 'white',
+    },
+    isUser: {
+      background: '#cfdbff',
+      color: 'black',
+      '&::before': {
+        content: '"(You)"',
+        padding: '0.5rem',
+        position: 'absolute',
+        top: '-1px',
+        right: '-1px',
+        fontStyle: 'italic',
+        background: 'red',
+        color: 'yellow',
+        borderRadius: '0 0.25rem 0 0.25rem',
+      },
+    },
+    image: {
+      width: '6rem',
+      margin: 'auto',
+      marginTop: '-1rem',
+    },
+    cardBody: {
+      padding: '1rem',
+    },
+    infoGroup: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 3fr',
+      gridGap: '1em',
+    },
+    infoText: {
+      margin: 'auto',
+      overflowWrap: 'anywhere',
+    },
+    name: {
+      overflowWrap: 'anywhere',
+    },
+    avatar: {
+      padding: '1rem 0 0.25rem 1rem',
+    },
+    actionButton: {
+      fontSize: '12px',
     },
   }),
 );

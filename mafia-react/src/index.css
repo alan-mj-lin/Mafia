@@ -1,51 +1,87 @@
 body {
-    font: 14px "Century Gothic", Futura, sans-serif;
-    margin: 20px;
+  font: 14px 'Century Gothic', Futura, sans-serif;
+  margin: 20px;
+}
+
+ol,
+ul {
+  padding-left: 30px;
+}
+
+.board-row:after {
+  clear: both;
+  content: '';
+  display: table;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  height: 34px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 34px;
+}
+
+.square:focus {
+  outline: none;
+}
+
+.kbd-navigation .square:focus {
+  background: #ddd;
+}
+
+.game {
+  display: flex;
+  flex-direction: row;
+}
+
+.game-info {
+  margin-left: 20px;
+}
+
+body {
+  background: #333;
+  color: white;
+  transition: background 1s, color 1s;
+}
+
+.card {
+  transition: background 1s, color 1s;
+}
+
+body[data-is-night='true'] {
+  background: black;
+  color: yellow;
+  animation: night-fall 2s forwards;
+}
+
+body[data-is-night='true'] [data-is-user='false'] .card {
+  background: black;
+  color: yellow;
+}
+
+body[data-is-night='false'] [data-is-user='false'] .card {
+  background: white;
+  color: black;
+}
+
+#transition-modal-title {
+  color: black;
+}
+
+@keyframes night-fall {
+  50% {
+    opacity: 0;
   }
-  
-  ol, ul {
-    padding-left: 30px;
-  }
-  
-  .board-row:after {
-    clear: both;
-    content: "";
-    display: table;
-  }
-  
-  .status {
-    margin-bottom: 10px;
-  }
-  
-  .square {
-    background: #fff;
-    border: 1px solid #999;
-    float: left;
-    font-size: 24px;
-    font-weight: bold;
-    line-height: 34px;
-    height: 34px;
-    margin-right: -1px;
-    margin-top: -1px;
-    padding: 0;
-    text-align: center;
-    width: 34px;
-  }
-  
-  .square:focus {
-    outline: none;
-  }
-  
-  .kbd-navigation .square:focus {
-    background: #ddd;
-  }
-  
-  .game {
-    display: flex;
-    flex-direction: row;
-  }
-  
-  .game-info {
-    margin-left: 20px;
-  }
-  
+}

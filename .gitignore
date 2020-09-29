@@ -3,3 +3,5 @@
 **/__pycache__
 .vscode/settings.json
 mafia-react/src/var/env.ts
+.DS_Store
+ip_logs.txt
