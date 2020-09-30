@@ -78,7 +78,8 @@ def game_start_write(database, roomId):
 
 def night_start_write(database, roomId):
     room_data = get_room(database, roomId)
-
+    if len(room_data.votes) > 0:
+        return False
     room_data.night += 1
     room_data.phase = 'mafia'
     room_data.gameMessages.append(
@@ -88,6 +89,8 @@ def night_start_write(database, roomId):
     # observer messages
     room_data.observerMessages.append(
         Message("Night " + str(room_data.night), "The night has begun!"))
+
+    return True
 
 
 def check_room_master(database, roomId, masterId):
@@ -172,6 +175,7 @@ def heal_action(database, roomId, name, targetId):
 
 def evaluate_win(room_data, players_left, num_mafia):
     num_civs = players_left - num_mafia
+    print(num_civs, num_mafia)
     if num_civs <= num_mafia:
         room_data.status = 'ended'
         room_data.phase = 'ended'
@@ -239,6 +243,13 @@ def detect_action(database, roomId, name, targetId):
 def vote(database, roomId, userId, targetId):
     room_data = get_room(database, roomId)
 
+    name = None
+
+    # get name
+    for i in room_data.players:
+        if i.userId == userId:
+            name = i.name
+
     for i in room_data.votes:
         if i.userId == userId:  # already voted
             return False
@@ -246,6 +257,10 @@ def vote(database, roomId, userId, targetId):
     for i in room_data.players:
         if i.userId == targetId:
             room_data.votes.append(Vote(userId, targetId, i.name))
+            room_data.gameMessages.append(
+                Message('Vote', name + ' voted ' + i.name))
+            room_data.observerMessages.append(
+                Message('Vote', name + ' voted ' + i.name))
             return True
     return False
 
@@ -275,9 +290,9 @@ def end_votes(database, roomId):
                 i.status = 'dead'
                 room_data.votes.clear()
                 room_data.gameMessages.append(
-                    Message('Execution', i.name + ' was hanged'))
+                    Message('Execution', i.name + ' was hanged. Votes: ' + str(max_count) + ' Players left: ' + str(players_left - 1)))
                 room_data.observerMessages.append(
-                    Message('Execution', i.name + ' was hanged'))
+                    Message('Execution', i.name + ' was hanged. Votes: ' + str(max_count) + ' Players left: ' + str(players_left - 1)))
                 is_execution = True
 
     mafia_left = sum(players.status == 'alive' and players.role ==
@@ -289,6 +304,7 @@ def end_votes(database, roomId):
     is_game_over = evaluate_win(room_data, players_left, mafia_left)
 
     if not is_game_over and is_execution:
+        room_data.votes.clear()
         return True
 
     if not is_game_over and not is_execution:

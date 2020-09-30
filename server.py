@@ -38,14 +38,14 @@ if __name__ != '__main__':
 
 
 def create_test_room():
-    players = [Player('alan', '12354', 'mafia', 'alive', False), Player('noob', '42314', 'civilian', 'alive', False), Player(
-        'noob', '22222', 'civilian', 'alive', False), Player('noob', '33333', 'civilian', 'alive', False), Player('noob', '44444', 'civilian', 'alive', False)]
+    players = [Player('alan', '12354', 'mafia', 'alive', False), Player('noob1', '42314', 'civilian', 'alive', False), Player(
+        'noob2', '22222', 'civilian', 'alive', False), Player('noob3', '33333', 'civilian', 'alive', False), Player('noob4', '44444', 'civilian', 'alive', False)]
     targets = Targets('', '', '')
     gameMessages = [Message('Pre-Game', 'Waiting for players...')]
     observerMessages = [Message(
         'Pre-Game', 'Waiting for players...'), Message('Observer Message', 'Testing...')]
     room = Room('0001', 2, 0, players, targets, 'pre-game', 'pre-game',
-                True, '44444', [], gameMessages, observerMessages)
+                True, '55555', [], gameMessages, observerMessages)
     database.append(room)
 
     LOG.info('Test room created..')
@@ -251,7 +251,9 @@ def night_start(roomId):
         is_room_master = check_room_master(database, roomId, userId)
         if not is_room_master:
             return build_actual_response({"message": "Not room master"}, 400)
-        night_start_write(database, roomId)
+        voting_ended = night_start_write(database, roomId)
+        if not voting_ended:
+            return build_actual_response({"message": "Voting still ongoing"}, 400)
         return build_actual_response({"message": "Night started"}, 200)
 
 
