@@ -36,6 +36,7 @@ export const MessageSideBar = ({
   return (
     <Drawer variant="permanent" className={classes.drawer} anchor="right">
       <ErrorDialog
+        isStartPage={false}
         message={errorMessage}
         isOpen={errorMessage !== '' ? true : false}
         handleClick={handleErrorClose}

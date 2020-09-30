@@ -12,6 +12,8 @@ import { stringify } from 'querystring';
 
 import { ErrorDialog } from '../components/ErrorDialog';
 
+import { styleDay, styleNight } from '../helpers/DayAndNight';
+
 import { API_URL } from '../var/env';
 
 export const StartPage = () => {
@@ -21,6 +23,8 @@ export const StartPage = () => {
   const [roomId, setRoomId] = useState<string>('');
   const [mafiaNum, setMafiaNum] = useState<string>('3');
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  styleDay();
 
   return (
     <Container maxWidth="sm">
@@ -97,6 +101,7 @@ export const StartPage = () => {
         </Button>
       </form>
       <ErrorDialog
+        isStartPage={true}
         handleClick={() => setErrorMessage('')}
         message={errorMessage}
         isOpen={errorMessage !== '' ? true : false}

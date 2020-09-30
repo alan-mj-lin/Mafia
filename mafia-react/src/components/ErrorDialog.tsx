@@ -11,12 +11,18 @@ export interface ErrorDialogProps {
   isOpen: boolean;
   message: string;
   handleClick: () => void;
+  isStartPage: boolean;
 }
 
-export const ErrorDialog = ({ isOpen, message, handleClick }: ErrorDialogProps) => {
+export const ErrorDialog = ({
+  isOpen,
+  message,
+  handleClick,
+  isStartPage,
+}: ErrorDialogProps) => {
   const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <div className={isStartPage ? classes.startpage : classes.root}>
       <Collapse in={isOpen}>
         <Alert
           severity="error"
@@ -48,6 +54,12 @@ const useStyles = makeStyles((theme: Theme) =>
       position: 'fixed',
       right: '0',
       bottom: '0',
+      '& > * + *': {
+        marginTop: theme.spacing(2),
+      },
+    },
+    startpage: {
+      width: '100%',
       '& > * + *': {
         marginTop: theme.spacing(2),
       },
