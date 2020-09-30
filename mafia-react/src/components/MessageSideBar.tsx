@@ -40,7 +40,7 @@ export const MessageSideBar = ({
     scrollToRef(myRef);
   }, [messages, phase]);
   return (
-    <Drawer id="drawer" variant="permanent" className={classes.drawer} anchor="right">
+    <Drawer variant="permanent" className={classes.drawer} anchor="right">
       <ErrorDialog
         isStartPage={false}
         message={errorMessage}
