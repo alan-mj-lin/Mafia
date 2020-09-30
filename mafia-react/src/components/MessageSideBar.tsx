@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -25,6 +25,8 @@ export interface MessageSideBarProps {
   phase: string;
 }
 
+const scrollToRef = (ref: any) => ref.current.scrollIntoView({ behavior: 'smooth' });
+
 export const MessageSideBar = ({
   messages,
   errorMessage,
@@ -33,6 +35,10 @@ export const MessageSideBar = ({
 }: MessageSideBarProps) => {
   const classes = useStyles();
   const isDay = phase === 'voting';
+  const myRef = useRef(null);
+  useEffect(() => {
+    scrollToRef(myRef);
+  }, [messages, phase]);
   return (
     <Drawer variant="permanent" className={classes.drawer} anchor="right">
       <ErrorDialog
@@ -60,6 +66,7 @@ export const MessageSideBar = ({
             </ListItem>
           );
         })}
+        <div id="bottom-of-messages" ref={myRef}></div>
       </List>
     </Drawer>
   );
