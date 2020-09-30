@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme: Theme) =>
       zIndex: 9999,
       width: '18vw',
       position: 'fixed',
-      right: '0',
+      right: '1',
       bottom: '0',
       '& > * + *': {
         marginTop: theme.spacing(2),
