@@ -20,8 +20,8 @@ class Message:
 
 
 class Player:
-    def __init__(self, name, userId, role, status, checked):
-        self.name, self.userId, self.role, self.status, self.checked = name, userId, role, status, checked
+    def __init__(self, name, userId, role, status, checked, polling):
+        self.name, self.userId, self.role, self.status, self.checked, self.polling = name, userId, role, status, checked, polling
 
 
 class Vote:

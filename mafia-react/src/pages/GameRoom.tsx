@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
+import { useBeforeunload } from 'react-beforeunload';
 
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -30,6 +31,7 @@ import {
   voteRequest,
   endVotesRequest,
   skipTurnRequest,
+  playerDisconnect,
 } from '../api/';
 
 import { API_URL } from '../var/env';
@@ -74,6 +76,13 @@ export const GameRoom = (props: Props) => {
   const classes = useStyles();
   const params = useParams<RouteParams>();
   const [errorMessage, setErrorMessage] = useState<string>('');
+  window.onpopstate = async () => {
+    await playerDisconnect(params.roomId);
+  };
+  useBeforeunload(async () => {
+    await playerDisconnect(params.roomId);
+    return undefined;
+  });
   const { isLoading, error, data } = useQuery(
     params.roomId,
     async () => {
@@ -101,6 +110,7 @@ export const GameRoom = (props: Props) => {
   const playerData = data?.data.players.find(
     (player: PlayerType) => player.userId === Cookies.get('userId'),
   );
+  console.log(data?.data);
   return (
     <div>
       {error && (
@@ -121,7 +131,7 @@ export const GameRoom = (props: Props) => {
         <div>
           <EntryModal
             isRoomMaster={data?.data.roomMaster === Cookies.get('userId') ? true : false}
-            playerData={playerData}
+            playerDataExists={playerData !== undefined ? true : false}
             roomId={params.roomId}
           />
           <Typography variant="h2">

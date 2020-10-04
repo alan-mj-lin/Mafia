@@ -14,7 +14,7 @@ from flask import Flask, request
 from flask.logging import default_handler, create_logger
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils import build_preflight_response, build_actual_response, write_json, generateGameRoomKey, set_polling_false, database_clean_up, check_new_ip, write_to_logfile
-from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes, phase_shift
+from database_actions import write_new_room, game_start_write, night_start_write, check_mafia, check_doctor, check_detective, check_room_master, kill_action, heal_action, detect_action, vote, end_votes, phase_shift, handle_disconnect
 from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Player
 
 app = Flask(__name__, static_folder='./mafia-react/build',
@@ -38,8 +38,8 @@ if __name__ != '__main__':
 
 
 def create_test_room():
-    players = [Player('alan', '12354', 'mafia', 'alive', False), Player('noob1', '42314', 'civilian', 'alive', False), Player(
-        'noob2', '22222', 'civilian', 'alive', False), Player('noob3', '33333', 'civilian', 'alive', False), Player('noob4', '44444', 'civilian', 'alive', False)]
+    players = [Player('alan', '12354', 'mafia', 'alive', False, None), Player('noob1', '42314', 'civilian', 'alive', False, None), Player(
+        'noob2', '22222', 'civilian', 'alive', False, None), Player('noob3', '33333', 'civilian', 'alive', False, None), Player('noob4', '44444', 'civilian', 'alive', False, None)]
     targets = Targets('', '', '')
     gameMessages = [Message('Pre-Game', 'Waiting for players...')]
     observerMessages = [Message(
@@ -74,12 +74,17 @@ def get_room_json():
     if request.method == 'OPTIONS':
         return build_preflight_response()
     elif request.method == 'GET':
+        userId = request.cookies.get('userId')
         roomId = request.args.get('roomId')
         roomFound = False
         for i in database:
             if i.id == roomId:
                 roomFound = True
                 i.polling = True
+                for x in i.players:
+                    if userId == x.userId and x.polling != None:
+                        x.polling = True
+
                 return build_actual_response(json.dumps(i, indent=4, cls=RoomEncoder), 200)
         if roomId is None or roomFound is False:
             return build_actual_response({"message": "Not Found"}, 404)
@@ -118,7 +123,7 @@ def join_room():
         isValidRoom = False
         room = None
         new_player = Player(request.form.get('name'),
-                            uuid.uuid4().hex, 'unassigned', 'alive', False)
+                            uuid.uuid4().hex, 'unassigned', 'alive', False, True)
 
         for i in database:
             if i.id == roomId:
@@ -271,6 +276,13 @@ def skip_turn(roomId):
         if not valid_phase_shift:
             return build_actual_response({"message": "Not valid phase shift"}, 400)
         return build_actual_response({"message": "Turn skipped"}, 200)
+
+
+@app.route('/rooms/<roomId>/disconnect', methods=['GET', 'OPTIONS'])
+def on_disconnect(roomId):
+    userId = request.cookies.get('userId')
+    handle_disconnect(database, roomId, userId)
+    return build_actual_response({"message": "Disconnect call"}, 200)
 
 
 @app.route('/')

@@ -363,3 +363,13 @@ def phase_shift(database, roomId):
             Message('Voting Phase', 'The night is over! Who is the mafia?'))
         return True
     return False
+
+
+def handle_disconnect(database, roomId, userId):
+    room_data = get_room(database, roomId)
+    print('disconnect')
+    if room_data.status == 'pre-game':
+        room_data.players[:] = [
+            x for x in room_data.players if x.userId != userId]
+        return True
+    return False
