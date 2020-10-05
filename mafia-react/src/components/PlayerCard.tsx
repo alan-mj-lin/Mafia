@@ -154,7 +154,6 @@ const useStyles = makeStyles((theme: Theme) =>
       boxShadow: '0.5rem 0.5rem',
     },
     isDead: {
-      transform: 'rotate(180deg)',
       background: 'pink !important',
     },
     image: {
