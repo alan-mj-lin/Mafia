@@ -7,7 +7,9 @@ import { red, green, grey } from '@material-ui/core/colors';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
 import spyicon from '../images/spyicon.png';
+import spyiconX from '../images/spyicon-x.png';
 import spyiconInverted from '../images/spyicon-inverted.png';
+import spyiconInvertedX from '../images/spyicon-inverted-x.png';
 
 export interface PlayerCardProps {
   name: string;
@@ -48,17 +50,18 @@ export const PlayerCard = ({
     avatar = <Avatar className={classes.green}></Avatar>;
   }
   const isDay = phase === 'voting';
+  const isDead = status !== 'alive';
+  let image = isUser || isDay ? spyicon : spyiconInverted;
+  if (isDead) {
+    image = image === spyicon ? spyiconX : spyiconInvertedX;
+  }
   return (
     <Card
       className={`${classes.card} ${isUser ? classes.isUser : ''} ${
         isVotedOn ? classes.isVotedOn + ' wobble-to-rest' : ''
-      } ${status !== 'alive' ? classes.isDead : ''}`}
+      } ${isDead && isDay ? classes.isDead : ''}`}
     >
-      <Card.Img
-        className={classes.image}
-        variant="top"
-        src={isUser || isDay ? spyicon : spyiconInverted}
-      />
+      <Card.Img className={classes.image} variant="top" src={image} />
       <Card.Body className={classes.cardBody}>
         <div className={classes.infoGroup}>
           <div className={classes.avatar}>{avatar}</div>
@@ -70,7 +73,7 @@ export const PlayerCard = ({
           </div>
         </div>
         <hr></hr>
-        <ButtonGroup>
+        <ButtonGroup style={{ visibility: isDead ? 'hidden' : 'visible' }}>
           <Button
             className={classes.actionButton}
             variant="primary"
