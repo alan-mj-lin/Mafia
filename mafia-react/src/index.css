@@ -85,3 +85,32 @@ body[data-is-night='false'] [data-is-user='false'] .card {
     opacity: 0;
   }
 }
+
+@keyframes wobble {
+  0% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  100% {
+    transform: rotate(-5deg);
+  }
+}
+
+@keyframes rest {
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.wobble-indefinitely {
+  transform: rotate(0);
+  animation: wobble forwards infinite 1s;
+}
+
+.wobble-to-rest {
+  transform: rotate(0);
+  animation: wobble forwards infinite 1s, rest forwards 5s;
+  animation-iteration-count: wobble 5, rest 1;
+}

@@ -17,6 +17,7 @@ export interface PlayerCardProps {
   phase: string;
   checked: boolean;
   isUser: boolean;
+  isVotedOn: boolean;
   onKill: (event: React.MouseEvent<unknown>) => void;
   onCheck: (event: React.MouseEvent<unknown>) => void;
   onHeal: (event: React.MouseEvent<unknown>) => void;
@@ -31,6 +32,7 @@ export const PlayerCard = ({
   phase,
   checked,
   isUser,
+  isVotedOn,
   onKill,
   onHeal,
   onCheck,
@@ -47,7 +49,11 @@ export const PlayerCard = ({
   }
   const isDay = phase === 'voting';
   return (
-    <Card className={`${classes.card} ${isUser && classes.isUser}`}>
+    <Card
+      className={`${classes.card} ${isUser ? classes.isUser : ''} ${
+        isVotedOn ? classes.isVotedOn + ' wobble-to-rest' : ''
+      } ${status !== 'alive' ? classes.isDead : ''}`}
+    >
       <Card.Img
         className={classes.image}
         variant="top"
@@ -142,6 +148,14 @@ const useStyles = makeStyles((theme: Theme) =>
         color: 'yellow',
         borderRadius: '0 0.25rem 0 0.25rem',
       },
+    },
+    isVotedOn: {
+      background: 'yellow !important',
+      boxShadow: '0.5rem 0.5rem',
+    },
+    isDead: {
+      transform: 'rotate(180deg)',
+      background: 'pink !important',
     },
     image: {
       width: '6rem',

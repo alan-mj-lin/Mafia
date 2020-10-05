@@ -101,6 +101,7 @@ export const GameRoom = (props: Props) => {
   const playerData = data?.data.players.find(
     (player: PlayerType) => player.userId === Cookies.get('userId'),
   );
+  const votedPlayers = data?.data.votes.map((voted: any) => voted.targetName);
   return (
     <div>
       {error && (
@@ -160,6 +161,7 @@ export const GameRoom = (props: Props) => {
                     }
                     status={player.status}
                     isUser={player.userId === Cookies.get('userId')}
+                    isVotedOn={votedPlayers.includes(player.name)}
                     phase={data?.data.phase}
                     onKill={async (event) =>
                       await killRequest(params.roomId, player.userId).catch((err) => {
