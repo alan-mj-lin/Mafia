@@ -31,7 +31,6 @@ import {
   voteRequest,
   endVotesRequest,
   skipTurnRequest,
-  playerDisconnect,
 } from '../api/';
 
 import { API_URL } from '../var/env';
@@ -76,13 +75,6 @@ export const GameRoom = (props: Props) => {
   const classes = useStyles();
   const params = useParams<RouteParams>();
   const [errorMessage, setErrorMessage] = useState<string>('');
-  window.onpopstate = async () => {
-    await playerDisconnect(params.roomId);
-  };
-  useBeforeunload(async () => {
-    await playerDisconnect(params.roomId);
-    return undefined;
-  });
   const { isLoading, error, data } = useQuery(
     params.roomId,
     async () => {
@@ -94,13 +86,15 @@ export const GameRoom = (props: Props) => {
       } else {
         styleNight();
       }
-      // console.log(room);
       return room;
     },
     {
       refetchInterval: 2000,
     },
   );
+
+  console.log(data);
+
   function showErrorMessage(message: string, delayToHide: number = 5000) {
     setErrorMessage(message);
     setTimeout(() => {
@@ -110,7 +104,7 @@ export const GameRoom = (props: Props) => {
   const playerData = data?.data.players.find(
     (player: PlayerType) => player.userId === Cookies.get('userId'),
   );
-  console.log(data?.data);
+  console.log(playerData);
   return (
     <div>
       {error && (

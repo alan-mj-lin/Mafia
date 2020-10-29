@@ -2,8 +2,10 @@ import uuid
 import json
 import random
 from math import ceil
-from utils import write_json, generateGameRoomKey
-from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Player, Vote
+from mongoengine import *
+from utils import generateGameRoomKey
+# from database import Room, RoomEncoder, customRoomDecoder, Targets, Message, Player, Vote
+from mongo_database import Room, Player, Target, Vote, GameMessage, ObserverMessage
 
 
 def get_room(database, roomId):
@@ -36,10 +38,10 @@ def write_new_room(database, numMafia):
     return database, new_room
 
 
-def game_start_write(database, roomId):
+def game_start_write(room):
     # shuffle the roles and assign them
     roles = []
-    room_data = get_room(database, roomId)
+    room_data = room
 
     if len(room_data.players)/2 <= room_data.numMafia:
         return False
@@ -64,15 +66,15 @@ def game_start_write(database, roomId):
     room_data.phase = 'mafia'
     # game messages
     room_data.gameMessages.append(
-        Message("Game Start", "Room is no longer accepting new players"))
+        GameMessage(primary="Game Start", secondary="Room is no longer accepting new players"))
     room_data.gameMessages.append(
-        Message("Night " + str(room_data.night), "The night has begun!"))
+        GameMessage(primary="Night " + str(room_data.night), secondary="The night has begun!"))
     room_data.gameMessages.append(
-        Message("Mafia Phase", "Mafia pick someone to kill"))
+        GameMessage(primary="Mafia Phase", secondary="Mafia pick someone to kill"))
     # observer messages
     room_data.observerMessages.append(
-        Message("Night " + str(room_data.night), "The night has begun!"))
-
+        ObserverMessage(primary="Night " + str(room_data.night), secondary="The night has begun!"))
+    room_data.save()
     return True
 
 
