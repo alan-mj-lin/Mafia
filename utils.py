@@ -3,6 +3,7 @@ import random
 import string
 from pprint import pprint
 from flask import make_response, jsonify
+from mongo_database import Room
 
 DOMAIN = '127.0.0.1'
 
@@ -41,10 +42,15 @@ def generateGameRoomKey(length=8):
     return ''.join(random.choice(letters) for i in range(length))
 
 
-def set_polling_false(database):
-    for i in database:
-        i.polling = False
+def set_polling_false():
+    print('Running set polling false..')
+    for room in Room.objects:
+        room.polling = False
+        room.save()
 
 
-def database_clean_up(database):
-    database[:] = [i for i in database if i.status != 'ended']
+def database_clean_up():
+    print('Running database cleanup...')
+    for room in Room.objects:
+        if room.phase == 'ended':
+            room.delete()

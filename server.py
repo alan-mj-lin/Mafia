@@ -18,7 +18,7 @@ from flask.logging import default_handler, create_logger
 from apscheduler.schedulers.background import BackgroundScheduler
 from database_actions import game_start_write
 from utils import build_response, generateGameRoomKey, set_polling_false, database_clean_up, check_new_ip, write_to_logfile
-from mongo_database import Room, Player, Target, GameMessage, ObserverMessage
+from mongo_database import Room, Player, Target, GameMessage, ObserverMessage, Vote
 from mongoengine import *
 
 connect('mafia')
@@ -45,14 +45,14 @@ if __name__ != '__main__':
     LOG.setLevel(gunicorn_logger.level)
 
 
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(func=set_polling_false, args=[database],
-#                   trigger="interval", seconds=60)
-# scheduler.add_job(func=database_clean_up, args=[database],
-#                   trigger='interval', seconds=86400)
-# scheduler.start()
-# LOG.info(
-#     'Background processes for polling detection and database cleanup initiated..')
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=set_polling_false,
+                  trigger="interval", seconds=60)
+scheduler.add_job(func=database_clean_up,
+                  trigger='interval', seconds=86400)
+scheduler.start()
+LOG.info(
+    'Background processes for polling detection and database cleanup initiated..')
 
 # will only return json for a particular room
 
@@ -176,7 +176,7 @@ def mafia_actions(roomId):
             return build_response({"message": "Not mafia"}, 400)
         name = killer.name
         target_player = room.get_player(targetId)
-        if target_player.status == 'alive':
+        if target_player.status == 'alive' and killer.status == 'alive':
             room.targets.killTarget = target_player.userId
             room.phase = 'doctor'
             room.gameMessages.append(GameMessage(
@@ -205,7 +205,7 @@ def doctor_actions(roomId):
         if userId != doctor.userId:
             return build_response({"message": "Not doctor"}, 400)
         target_player = room.get_player(targetId)
-        if target_player.status == 'alive':
+        if target_player.status == 'alive' and doctor.status == 'alive':
             room.targets.healTarget = target_player.userId
             room.phase = 'detective'
             room.gameMessages.append(
@@ -245,10 +245,10 @@ def detective_actions(roomId):
 
         is_game_over = room.evaluate_win
         if not is_game_over:
-            if target_player.status == 'alive':
+            if target_player.status == 'alive' and detective.status == 'alive':
                 target_player.checked = True
             if killed_player is None:
-                room_data.gameMessages.append(GameMessage(
+                room.gameMessages.append(GameMessage(
                     primary='Night End', secondary='The victim was healed'))
             room.targets = Target(killTarget='', healTarget='', checkTarget='')
             room.phase = 'voting'
@@ -263,69 +263,136 @@ def detective_actions(roomId):
 
 
 @ app.route('/rooms/<roomId>/vote', methods=['PATCH', 'OPTIONS'])
+@cross_origin(supports_credentials=True)
 def hang_action(roomId):
     LOG.info(request.access_route[0] + ' requested ' + request.url)
-    if request.method == 'OPTIONS':
-        return build_preflight_response()
-    elif request.method == 'PATCH':
-        userId = request.cookies.get('userId')
-        is_room_master = check_room_master(database, roomId, userId)
-        if is_room_master:
-            return build_actual_response({"message": "Room master cannot vote"}, 400)
-        is_valid_target = vote(database, roomId, userId,
-                               request.form.get('targetId'))
-        if not is_valid_target:
-            return build_actual_response({"message": "Not valid target or already voted"}, 400)
-        return build_actual_response({"message": "Vote Added"}, 200)
+    userId = request.cookies.get('userId')
+    targetId = request.form.get('targetId')
+    try:
+        room = Room.objects.get(roomId=roomId)
+        if room.roomMaster == userId:
+            return build_response({"message": "Room master cannot vote"}, 400)
+        if room.check_vote(userId):
+            return build_response({"message": "Already voted"}, 400)
+        voter = room.get_player(userId)
+        target = room.get_player(targetId)
+        if target.status == 'alive' and voter.status == 'alive':
+            room.votes.append(
+                Vote(userId=userId, targetId=target.userId, targetName=target.name))
+            room.gameMessages.append(
+                GameMessage(primary='Vote', secondary=voter.name + ' voted ' + target.name))
+            room.observerMessages.append(
+                ObserverMessage(primary='Vote', secondary=voter.name + ' voted ' + target.name))
+            room.save()
+            return build_response({"message": "Valid vote"}, 200)
+        else:
+            return build_response({"message": "Cannot vote a player who is not alive"}, 400)
+
+    except Exception as e:
+        print(e)
+        return build_response({"message": "Unexpected server error"}, 500)
 
 
 @ app.route('/rooms/<roomId>/hang', methods=['PATCH', 'OPTIONS'])
+@cross_origin(supports_credentials=True)
 def end_vote_phase(roomId):
     LOG.info(request.access_route[0] + ' requested ' + request.url)
-    if request.method == 'OPTIONS':
-        return build_preflight_response()
-    elif request.method == 'PATCH':
-        userId = request.cookies.get('userId')
-        is_room_master = check_room_master(database, roomId, userId)
-        if not is_room_master:
-            return build_actual_response({"message": "Not room master"}, 400)
-
-        valid_vote_result = end_votes(database, roomId)
-        if not valid_vote_result:
-            return build_actual_response({"message": "Not enough votes"}, 200)
-        return build_actual_response({"message": "Valid execution"}, 200)
+    userId = request.cookies.get('userId')
+    try:
+        room = Room.objects.get(roomId=roomId)
+        if userId != room.roomMaster:
+            return build_response({"message": "Not room master"}, 400)
+        room.hang
+        room.evaluate_win
+        room.night += 1
+        room.phase = 'mafia'
+        room.update(votes=[])
+        room.gameMessages.append(
+            GameMessage(primary="Night " + str(room.night), secondary="The night has begun!"))
+        room.gameMessages.append(
+            GameMessage(primary="Mafia Phase", secondary="Mafia pick someone to kill"))
+        # observer messages
+        room.observerMessages.append(
+            ObserverMessage(primary="Night " + str(room.night), secondary="The night has begun!"))
+        room.save()
+        return build_response({"message": "Night started"}, 200)
+    except Exception as e:
+        print(e)
+        return build_response({"message": "Unexpected server error"}, 500)
 
 
 @ app.route('/rooms/<roomId>/night', methods=['PATCH', 'OPTIONS'])
+@ cross_origin(supports_credentials=True)
 def night_start(roomId):
     LOG.info(request.access_route[0] + ' requested ' + request.url)
-    if request.method == 'OPTIONS':
-        return build_preflight_response()
-    elif request.method == 'PATCH':
-        userId = request.cookies.get('userId')
-        is_room_master = check_room_master(database, roomId, userId)
-        if not is_room_master:
-            return build_actual_response({"message": "Not room master"}, 400)
-        voting_ended = night_start_write(database, roomId)
-        if not voting_ended:
-            return build_actual_response({"message": "Voting still ongoing"}, 400)
-        return build_actual_response({"message": "Night started"}, 200)
+    userId = request.cookies.get('userId')
+    try:
+        room = Room.objects.get(roomId=roomId)
+        if userId != room.roomMaster:
+            return build_response({"message": "Not room master"}, 400)
+        if len(room.votes) > 0:
+            return build_response({"message": "Voting still ongoing"}, 400)
+        room.night += 1
+        room.phase = 'mafia'
+        room.gameMessages.append(
+            GameMessage(primary="Night " + str(room.night), secondary="The night has begun!"))
+        room.gameMessages.append(
+            GameMessage(primary="Mafia Phase", secondary="Mafia pick someone to kill"))
+        # observer messages
+        room.observerMessages.append(
+            ObserverMessage(primary="Night " + str(room.night), secondary="The night has begun!"))
+        room.save()
+        return build_response({"message": "Night started"}, 200)
+    except Exception as e:
+        print(e)
+        return build_response({"message": "Unexpected server error"}, 500)
 
 
 @ app.route('/rooms/<roomId>/skip', methods=['PATCH', 'OPTIONS'])
+@ cross_origin(supports_credentials=True)
 def skip_turn(roomId):
     LOG.info(request.access_route[0] + ' requested ' + request.url)
-    if request.method == 'OPTIONS':
-        return build_preflight_response()
-    elif request.method == 'PATCH':
-        userId = request.cookies.get('userId')
-        is_room_master = check_room_master(database, roomId, userId)
-        if not is_room_master:
-            return build_actual_response({"message": "Not room master"}, 400)
-        valid_phase_shift = phase_shift(database, roomId)
-        if not valid_phase_shift:
-            return build_actual_response({"message": "Not valid phase shift"}, 400)
-        return build_actual_response({"message": "Turn skipped"}, 200)
+    userId = request.cookies.get('userId')
+    try:
+        room = Room.objects.get(roomId=roomId)
+        if userId != room.roomMaster:
+            return build_response({"message": "Not room master"}, 400)
+        if room.phase == 'mafia':
+            room.phase = 'doctor'
+            room.gameMessages.append(
+                GameMessage(primary='Doctor Phase', secondary='Doctor pick someone to heal'))
+            room.save()
+            return build_response({"message": "Turn skipped"}, 200)
+        elif room.phase == 'doctor':
+            room.phase = 'detective'
+            room.gameMessages.append(
+                GameMessage(primary='Detective Phase', secondary='Detective pick someone to check'))
+            room.save()
+            return build_response({"message": "Turn skipped"}, 200)
+        elif room.phase == 'detective':
+            killed_player = None
+            if room.targets.killTarget != room.targets.healTarget:
+                killed_player = room.get_player(room.targets.killTarget)
+                killed_player.status = 'dead'
+                room.gameMessages.append(GameMessage(
+                    primary='Night End', secondary=killed_player.name + ' was killed'))
+
+            is_game_over = room.evaluate_win
+            if not is_game_over:
+                if killed_player is None:
+                    room.gameMessages.append(GameMessage(
+                        primary='Night End', secondary='The victim was healed'))
+                room.targets = Target(
+                    killTarget='', healTarget='', checkTarget='')
+                room.phase = 'voting'
+                room.gameMessages.append(
+                    GameMessage(primary='Voting Phase', secondary='The night is over! Who is the mafia?'))
+            room.save()
+            return build_response({"message": "Turn skipped"}, 200)
+        return build_response({"message": "Not valid phase shift"}, 400)
+    except Exception as e:
+        print(e)
+        return build_response({"message": "Unexpected server error"}, 500)
 
 
 @ app.route('/')

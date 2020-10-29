@@ -241,7 +241,7 @@ export const GameRoom = (props: Props) => {
                   >
                     End Votes
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="contained"
                     disabled={
                       Cookies.get('userId') !== data?.data.roomMaster ||
@@ -257,7 +257,7 @@ export const GameRoom = (props: Props) => {
                     }
                   >
                     Start Night
-                  </Button>
+                  </Button> */}
                   <Button
                     variant="contained"
                     disabled={

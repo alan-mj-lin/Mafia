@@ -1,5 +1,6 @@
 from mongoengine import *
 from pprint import pprint
+from math import ceil
 
 
 class Target(EmbeddedDocument):
@@ -57,6 +58,45 @@ class Room(Document):
             if player.userId == userId:
                 return player
 
+    def check_vote(self, userId):
+        for vote in self.votes:
+            if vote.userId == userId:
+                return True
+
+    @property
+    def hang(self):
+        max_count = 0
+        suspectIdList = []
+        is_execution = False
+        for i in self.players:
+            count = sum(vote.targetId == i.userId for vote in self.votes)
+            if count > max_count:
+                max_count = count
+                suspectIdList.clear()
+                suspectIdList.append(i.userId)
+            elif count == max_count:
+                suspectIdList.append(i.userId)
+        max_count = ceil(max_count)
+
+        if max_count >= ceil(self.players_left/2):
+            for player in self.players:
+                if player.userId == suspectIdList[0]:
+                    player.status = 'dead'
+                    self.votes.clear()
+                    self.gameMessages.append(
+                        GameMessage(primary='Execution', secondary=player.name + ' was hanged. Votes: ' + str(max_count) + ' Players left: ' + str(self.players_left)))
+                    self.observerMessages.append(
+                        ObserverMessage(primary='Execution', secondary=player.name + ' was hanged. Votes: ' + str(max_count) + ' Players left: ' + str(self.players_left)))
+                    self.save()
+                    return True
+        self.votes.clear()
+        self.gameMessages.append(
+            GameMessage(primary='Execution', secondary='Not enough votes, no one was hanged.'))
+        self.observerMessages.append(
+            ObserverMessage(primary='Execution', secondary='Not enough votes, no one was hanged.'))
+        self.save()
+        return False
+
     @property
     def doctor(self):
         for player in self.players:
@@ -95,15 +135,20 @@ class Room(Document):
             self.gameMessages.append(
                 GameMessage(primary='Game Over', secondary='The villagers weeded out all the Mafia.'))
             self.observerMessages.append(
-                Message(primary='Game Over', secondary='The villagers weeded out all the Mafia.'))
+                ObserverMessage(primary='Game Over', secondary='The villagers weeded out all the Mafia.'))
             self.save()
             return True
+        return False
 
 
 def reset_test_room():
     connect('mafia')
-    room = Room.objects.get(roomId='0001')
-    room.delete()
+    room = None
+    try:
+        room = Room.objects.get(roomId='0001')
+        room.delete()
+    except DoesNotExist:
+        pass
     targets = Target(killTarget='', healTarget='', checkTarget='')
     test_players = [
         Player(name='alan', userId='12345', role='unassigned',

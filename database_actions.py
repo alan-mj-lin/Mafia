@@ -182,17 +182,17 @@ def evaluate_win(room_data, players_left, num_mafia):
         room_data.status = 'ended'
         room_data.phase = 'ended'
         room_data.gameMessages.append(
-            Message('Game Over', 'All the villagers were brutally executed by the Mafia.'))
+            GameMessage('Game Over', 'All the villagers were brutally executed by the Mafia.'))
         room_data.observerMessages.append(
-            Message('Game Over', 'All the villagers were brutally executed by the Mafia.'))
+            ObserverMessage('Game Over', 'All the villagers were brutally executed by the Mafia.'))
         return True
     if num_mafia == 0:
         room_data.status = 'ended'
         room_data.phase = 'ended'
         room_data.gameMessages.append(
-            Message('Game Over', 'The villagers weeded out all the Mafia.'))
+            GameMessage('Game Over', 'The villagers weeded out all the Mafia.'))
         room_data.observerMessages.append(
-            Message('Game Over', 'The villagers weeded out all the Mafia.'))
+            ObserverMessage('Game Over', 'The villagers weeded out all the Mafia.'))
         return True
 
 
