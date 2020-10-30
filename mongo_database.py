@@ -1,6 +1,7 @@
 from mongoengine import *
 from pprint import pprint
 from math import ceil
+from datetime import datetime
 
 
 class Target(EmbeddedDocument):
@@ -15,7 +16,7 @@ class Player(EmbeddedDocument):
     role = StringField(required=True)
     status = StringField(required=True)
     checked = BooleanField(required=True)
-    last_poll = DateTimeField()
+    last_poll = DateTimeField(default=datetime.utcnow(), required=True)
 
 
 class GameMessage(EmbeddedDocument):
@@ -139,6 +140,10 @@ class Room(Document):
             self.save()
             return True
         return False
+
+    @property
+    def online_players(self):
+        return [player for player in self.players if (datetime.utcnow() - player.last_poll).total_seconds() < 4]
 
 
 def reset_test_room():

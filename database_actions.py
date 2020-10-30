@@ -42,7 +42,8 @@ def game_start_write(room):
     # shuffle the roles and assign them
     roles = []
     room_data = room
-
+    print(room_data.online_players)
+    room_data.update(players=room_data.online_players)
     if len(room_data.players)/2 <= room_data.numMafia:
         return False
 
