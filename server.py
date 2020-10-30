@@ -26,7 +26,8 @@ connect('mafia')
 app = Flask(__name__, static_folder='./mafia-react/build',
             static_url_path='/')
 app.config['CORS_HEADERS'] = 'Content-Type'
-CORS(app, origins=['http://localhost:3000'], supports_credentials=True)
+CORS(app, origins=['http://localhost:8000',
+                   'http://10.10.150.50'], supports_credentials=True)
 
 tz_TO = pytz.timezone('America/Toronto')
 
@@ -77,6 +78,8 @@ def after_request(response):
 
 
 @app.route('/room', methods=['GET', 'OPTIONS'])
+@cross_origin(origins=['http://localhost:8000',
+                       'http://10.10.150.50'], supports_credentials=True)
 def get_room_json():
     LOG.info(
         request.access_route[0] + ' requested ' + request.url)
@@ -99,6 +102,7 @@ def get_room_json():
 
 # create a new room object in database.json
 @app.route('/actions/create-room', methods=['POST', 'OPTIONS'])
+@cross_origin(supports_credentials=True)
 def create_room():
     LOG.info(request.access_route[0] + ' requested ' + request.url)
     try:
@@ -133,6 +137,8 @@ def create_room():
 
 # add player object to room
 @ app.route('/actions/join-room', methods=['POST', 'OPTIONS'])
+@cross_origin(origins=['http://localhost:8000',
+                       'http://10.10.150.50'], supports_credentials=True)
 def join_room():
     LOG.info(request.access_route[0] + ' requested ' + request.url)
     userId = request.cookies.get('userId')

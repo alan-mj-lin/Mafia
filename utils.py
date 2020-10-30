@@ -5,15 +5,12 @@ from pprint import pprint
 from flask import make_response, jsonify
 from mongo_database import Room
 
-DOMAIN = '127.0.0.1'
-
-CORS = 'http://localhost:3000'
-
 
 def build_response(json, status, setCookie=False, cookie='', expiryTime=None):
     response = make_response(jsonify(json), status)
     if setCookie:
-        response.set_cookie('userId', cookie)
+        response.set_cookie(
+            'userId', cookie, expires=expiryTime)
     elif setCookie and expiryTime is not None:
         response.set_cookie('userId', cookie, expires=expiryTime)
     return response
