@@ -112,11 +112,11 @@ class Room(Document):
 
     @property
     def players_left(self):
-        return sum(players.status == 'alive' for players in self.players)
+        return sum(player.status == 'alive' for player in self.players)
 
     @property
     def mafia_left(self):
-        return sum(players.status == 'alive' and players.role == 'mafia' for players in self.players)
+        return sum(player.status == 'alive' and player.role == 'mafia' for player in self.players)
 
     @property
     def evaluate_win(self):
