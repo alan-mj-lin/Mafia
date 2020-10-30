@@ -124,7 +124,7 @@ export const GameRoom = (props: Props) => {
         <div>
           <EntryModal
             isRoomMaster={data?.data.roomMaster === Cookies.get('userId') ? true : false}
-            playerDataExists={playerData !== undefined ? true : false}
+            playerDataExists={playerData !== undefined}
             roomId={params.roomId}
           />
           <Typography variant="h2">
