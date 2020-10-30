@@ -137,66 +137,10 @@ export const GameRoom = (props: Props) => {
             {data?.data.players.map((player: PlayerType, index: number) => {
               const isUser = player.userId === Cookies.get('userId');
               if (
-                (Date.now() - player.last_poll.$date) / 1000 < 4 &&
-                data?.data.phase == 'pre-game'
+                ((Date.now() - player.last_poll.$date) / 1000 < 4 &&
+                  data?.data.phase === 'pre-game') ||
+                data?.data.phase !== 'pre-game'
               ) {
-                return (
-                  <Grid
-                    item
-                    key={index}
-                    data-is-user={isUser}
-                    style={{ order: isUser ? -1 : 0 }}
-                  >
-                    <PlayerCard
-                      last_poll={player.last_poll}
-                      name={player.name}
-                      role={
-                        player.userId === Cookies.get('userId') ||
-                        data?.data.roomMaster === Cookies.get('userId') ||
-                        (playerData !== undefined &&
-                          playerData.role === 'mafia' &&
-                          player.role === 'mafia') ||
-                        data?.data.status === 'ended'
-                          ? player.role
-                          : '???'
-                      }
-                      trueRole={player.role}
-                      checked={
-                        playerData !== undefined && playerData.role === 'detective'
-                          ? player.checked
-                          : false
-                      }
-                      status={player.status}
-                      isUser={player.userId === Cookies.get('userId')}
-                      phase={data?.data.phase}
-                      onKill={async (event) =>
-                        await killRequest(params.roomId, player.userId).catch((err) => {
-                          if (err.response.status >= 400)
-                            showErrorMessage(err.response.data.message);
-                        })
-                      }
-                      onHeal={async (event) =>
-                        await healRequest(params.roomId, player.userId).catch((err) => {
-                          if (err.response.status >= 400)
-                            showErrorMessage(err.response.data.message);
-                        })
-                      }
-                      onCheck={async (event) =>
-                        await checkRequest(params.roomId, player.userId).catch((err) => {
-                          if (err.response.status >= 400)
-                            showErrorMessage(err.response.data.message);
-                        })
-                      }
-                      onHang={async (event) =>
-                        await voteRequest(params.roomId, player.userId).catch((err) => {
-                          if (err.response.status >= 400)
-                            showErrorMessage(err.response.data.message);
-                        })
-                      }
-                    />
-                  </Grid>
-                );
-              } else {
                 return (
                   <Grid
                     item
