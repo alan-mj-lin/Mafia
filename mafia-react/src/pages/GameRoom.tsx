@@ -247,23 +247,6 @@ export const GameRoom = (props: Props) => {
                   >
                     End Votes
                   </Button>
-                  {/* <Button
-                    variant="contained"
-                    disabled={
-                      Cookies.get('userId') !== data?.data.roomMaster ||
-                      data?.data.phase !== 'voting'
-                    }
-                    onClick={async () =>
-                      await nightStart(params.roomId)
-                        .then(styleNight)
-                        .catch((err) => {
-                          if (err.response.status >= 400)
-                            showErrorMessage(err.response.data.message);
-                        })
-                    }
-                  >
-                    Start Night
-                  </Button> */}
                   <Button
                     variant="contained"
                     disabled={
