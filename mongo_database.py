@@ -1,9 +1,13 @@
+import os
 from mongoengine import *
 from pprint import pprint
 from math import ceil
 from datetime import datetime
+from dotenv import load_dotenv
 
-container_ip = '172.17.0.2'
+load_dotenv()
+
+container_ip = os.getenv("MONGODB_IP")
 
 
 class Target(EmbeddedDocument):

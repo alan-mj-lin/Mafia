@@ -2,6 +2,7 @@
 """
 This is the main file to run.
 """
+import os
 import time
 import json
 import uuid
@@ -10,6 +11,7 @@ import string
 import logging
 import pytz
 import requests
+from dotenv import load_dotenv
 from datetime import datetime
 from pprint import pprint
 from flask import Flask, request
@@ -21,7 +23,8 @@ from utils import build_response, generateGameRoomKey, set_polling_false, databa
 from mongo_database import Room, Player, Target, GameMessage, ObserverMessage, Vote
 from mongoengine import *
 
-container_ip = '172.17.0.2'
+load_dotenv()
+container_ip = os.getenv("MONGODB_IP")
 
 connect('mafia', host=container_ip, port=27017)
 cors_list = [
