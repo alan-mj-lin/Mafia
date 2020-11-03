@@ -21,13 +21,19 @@ from utils import build_response, generateGameRoomKey, set_polling_false, databa
 from mongo_database import Room, Player, Target, GameMessage, ObserverMessage, Vote
 from mongoengine import *
 
-connect('mafia')
+container_ip = '172.17.0.2'
 
+connect('mafia', host=container_ip, port=27017)
+cors_list = [
+    'http://localhost:8000',
+    'http://10.10.150.50',
+    'http://localhost',
+    'http://10.10.150.50:8000'
+]
 app = Flask(__name__, static_folder='./mafia-react/build',
             static_url_path='/')
 app.config['CORS_HEADERS'] = 'Content-Type'
-CORS(app, origins=['http://localhost:8000',
-                   'http://10.10.150.50'], supports_credentials=True)
+CORS(app, origins=cors_list, supports_credentials=True)
 
 tz_TO = pytz.timezone('America/Toronto')
 
@@ -78,8 +84,7 @@ def after_request(response):
 
 
 @app.route('/room', methods=['GET', 'OPTIONS'])
-@cross_origin(origins=['http://localhost:8000',
-                       'http://10.10.150.50'], supports_credentials=True)
+@cross_origin(origins=cors_list, supports_credentials=True)
 def get_room_json():
     LOG.info(
         request.access_route[0] + ' requested ' + request.url)
@@ -137,8 +142,7 @@ def create_room():
 
 # add player object to room
 @ app.route('/actions/join-room', methods=['POST', 'OPTIONS'])
-@cross_origin(origins=['http://localhost:8000',
-                       'http://10.10.150.50'], supports_credentials=True)
+@cross_origin(origins=cors_list, supports_credentials=True)
 def join_room():
     LOG.info(request.access_route[0] + ' requested ' + request.url)
     userId = request.cookies.get('userId')

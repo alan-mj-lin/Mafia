@@ -3,6 +3,8 @@ from pprint import pprint
 from math import ceil
 from datetime import datetime
 
+container_ip = '172.17.0.2'
+
 
 class Target(EmbeddedDocument):
     killTarget = StringField(required=True)
@@ -147,7 +149,7 @@ class Room(Document):
 
 
 def reset_test_room():
-    connect('mafia')
+    connect('mafia', host=container_ip, port=27017)
     room = None
     try:
         room = Room.objects.get(roomId='0001')
