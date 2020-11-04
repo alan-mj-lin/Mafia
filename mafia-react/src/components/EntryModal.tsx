@@ -15,23 +15,25 @@ import { PlayerType } from '../types';
 import { API_URL } from '../var/env';
 
 export interface EntryModalProps {
-  playerData: PlayerType | undefined;
+  playerDataExists: boolean;
   roomId: string;
   isRoomMaster: boolean;
 }
 
-export const EntryModal = ({ playerData, roomId, isRoomMaster }: EntryModalProps) => {
+export const EntryModal = ({
+  playerDataExists,
+  roomId,
+  isRoomMaster,
+}: EntryModalProps) => {
   const classes = useStyles();
   const [displayName, setDisplayName] = useState<string>('');
-  const [open, setOpen] = useState<boolean>(true);
-  const handleClose = () => {
-    setOpen(false);
-  };
+
+  console.log(playerDataExists);
   return (
     <Modal
       className={classes.modal}
       open={
-        playerData !== undefined || Cookies.get('userId') === 'observer' || isRoomMaster
+        playerDataExists || Cookies.get('userId') === 'observer' || isRoomMaster
           ? false
           : true
       }
@@ -41,7 +43,13 @@ export const EntryModal = ({ playerData, roomId, isRoomMaster }: EntryModalProps
         timeout: 500,
       }}
     >
-      <Fade in={open}>
+      <Fade
+        in={
+          playerDataExists || Cookies.get('userId') === 'observer' || isRoomMaster
+            ? false
+            : true
+        }
+      >
         <div className={classes.paper}>
           <h2 id="transition-modal-title">Room {roomId}</h2>
           <TextField
@@ -65,7 +73,6 @@ export const EntryModal = ({ playerData, roomId, isRoomMaster }: EntryModalProps
                 .then((data) => {
                   console.log(data);
                 });
-              handleClose();
             }}
           >
             Join Room
@@ -85,7 +92,6 @@ export const EntryModal = ({ playerData, roomId, isRoomMaster }: EntryModalProps
                 .then((data) => {
                   console.log(data);
                 });
-              handleClose();
             }}
           >
             Observe

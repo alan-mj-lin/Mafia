@@ -2,8 +2,8 @@
     "rooms": [
         {
             "id": "0001",
-            "numMafia": 3,
-            "night": 1,
+            "numMafia": 2,
+            "night": 0,
             "players": [
                 {
                     "name": "alan",
@@ -28,24 +28,6 @@
                     "userId": "1123122354",
                     "role": "civilian",
                     "status": "alive"
-                },
-                {
-                    "name": "not-cool",
-                    "userId": "1123122354",
-                    "role": "mafia",
-                    "status": "alive"
-                },
-                {
-                    "name": "fun",
-                    "userId": "1123122354",
-                    "role": "detective",
-                    "status": "alive"
-                },
-                {
-                    "name": "cool",
-                    "userId": "1785face6d8c4bba92dcfde2a6b8a652",
-                    "role": "mafia",
-                    "status": "alive"
                 }
             ],
             "targets": {
@@ -53,91 +35,20 @@
                 "healTarget": "",
                 "checkTarget": ""
             },
-            "status": "in-progress",
-            "phase": "mafia",
+            "status": "pre-game",
+            "phase": "pre-game",
             "polling": false,
             "roomMaster": "6828a06020e54cdb874e5068a3b53cd9",
             "gameMessages": [
                 {
                     "primary": "Pre-Game",
                     "secondary": "Waiting for players.."
-                },
-                {
-                    "primary": "Game Start",
-                    "secondary": "Room is no longer accepting new players"
-                },
-                {
-                    "primary": "Night 1",
-                    "secondary": "The night has begun!"
-                },
-                {
-                    "primary": "Mafia Phase",
-                    "secondary": "Mafia pick someone to kill"
                 }
             ],
             "observerMessages": [
                 {
                     "primary": "Waiting for players",
                     "secondary": "Waiting for players.."
-                },
-                {
-                    "primary": "Night 1",
-                    "secondary": "The night has begun!"
-                }
-            ]
-        },
-        {
-            "id": "fvtNdluI",
-            "numMafia": 3,
-            "players": [
-                {
-                    "name": "yo",
-                    "userId": "7ff7ba80d3ff41999072effd7aa1d232",
-                    "role": "unassigned",
-                    "status": "alive"
-                }
-            ],
-            "status": "pre-game",
-            "phase": "pre-game",
-            "polling": false,
-            "roomMaster": "8792df34d49c4dd78e0b97883c8ebf02",
-            "gameMessages": [
-                {
-                    "primary": "Waiting for players",
-                    "secondary": "Waiting for players.."
-                }
-            ],
-            "observerMessages": [
-                {
-                    "primary": "Waiting for players",
-                    "secondary": "Waiting for players.."
-                }
-            ]
-        },
-        {
-            "id": "DFLYXNIQ",
-            "numMafia": 3,
-            "night": 0,
-            "players": [],
-            "targets": {
-                "killTarget": "",
-                "healTarget": "",
-                "checkTarget": ""
-            },
-            "status": "pregame",
-            "phase": "pre-game",
-            "polling": false,
-            "roomMaster": "dbcb01a94e064462b56a0d3a8698a1d7",
-            "gameMessages": [
-                {
-                    "primary": "Waiting for players",
-                    "secondary": "Waiting for players"
-                }
-            ],
-            "observerMessages": [
-                {
-                    "primary": "Waiting for players",
-                    "secondary": "Waiting for players"
                 }
             ]
         }
