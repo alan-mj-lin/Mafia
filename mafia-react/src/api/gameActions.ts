@@ -49,3 +49,7 @@ export function endVotesRequest(roomId: string): Promise<AxiosResponse> {
 export function skipTurnRequest(roomId: string): Promise<AxiosResponse> {
   return axios.patch(`${API_URL}/rooms/${roomId}/skip`, null, { withCredentials: true });
 }
+
+export function playerDisconnect(roomId: string): Promise<AxiosResponse> {
+  return axios.get(`${API_URL}/rooms/${roomId}/disconnect`, { withCredentials: true });
+}
