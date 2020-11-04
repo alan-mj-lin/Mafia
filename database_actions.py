@@ -8,7 +8,8 @@ def game_start_write(room):
     roles = []
     room_data = room
     print(room_data.online_players)
-    room_data.update(players=room_data.online_players)
+    room_data.update_players()
+    room_data.reload()
     if len(room_data.players)/2 <= room_data.numMafia:
         return False
 

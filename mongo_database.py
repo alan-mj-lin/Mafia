@@ -151,6 +151,12 @@ class Room(Document):
     def online_players(self):
         return [player for player in self.players if (datetime.utcnow() - player.last_poll).total_seconds() < 4]
 
+    def update_players(self):
+        for player in self.players:
+            if (datetime.utcnow() - player.last_poll).total_seconds() >= 4:
+                self.update(pull__players=player)
+        self.save()
+
 
 def reset_test_room():
     connect('mafia', host=container_ip, port=27017)
@@ -177,11 +183,28 @@ def reset_test_room():
     test_obs_messages = [
         ObserverMessage(primary='Pre-Game', secondary='Waiting for players...')
     ]
-    test_room = Room(roomId='0001', numMafia=2, night=0, players=test_players, targets=targets, status='pre-game', phase='pre-game',
+    test_room = Room(roomId='0001', numMafia=1, night=0, players=test_players, targets=targets, status='pre-game', phase='pre-game',
                      polling=False, roomMaster='55555', votes=[], gameMessages=test_game_messages, observerMessages=test_obs_messages)
     test_room.save()
     rooms = Room.objects(roomId='0001').to_json()
     print(rooms)
+    print(test_room.online_players)
+    disconnect()
+
+
+def players():
+    connect('mafia', host=container_ip, port=27017)
+    room = Room.objects.get(roomId='0001')
+    return room.online_players
+
+
+def update(data=[]):
+    connect('mafia', host=container_ip, port=27017)
+    room = Room.objects.get(roomId='0001')
+    room.update(players=[])
+    room.reload()
+    room.players.extend(data)
+    room.save()
     disconnect()
 
 

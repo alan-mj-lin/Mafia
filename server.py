@@ -30,7 +30,7 @@ connect('mafia', host=container_ip, port=27017)
 cors_list = [
     'http://localhost:8000',
     'http://10.10.150.50',
-    'http://localhost',
+    'http://localhost:3000',
     'http://10.10.150.50:8000'
 ]
 app = Flask(__name__, static_folder='./mafia-react/build',
