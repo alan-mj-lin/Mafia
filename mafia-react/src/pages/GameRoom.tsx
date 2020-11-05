@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
+import { useBeforeunload } from 'react-beforeunload';
 
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -45,6 +46,7 @@ interface PlayerType {
   status: string;
   userId: string;
   checked: boolean;
+  last_poll: { $date: number };
 }
 
 interface Props {
@@ -85,13 +87,13 @@ export const GameRoom = (props: Props) => {
       } else {
         styleNight();
       }
-      // console.log(room);
       return room;
     },
     {
-      refetchInterval: 2000,
+      refetchInterval: 1000,
     },
   );
+
   function showErrorMessage(message: string, delayToHide: number = 5000) {
     setErrorMessage(message);
     setTimeout(() => {
@@ -102,6 +104,7 @@ export const GameRoom = (props: Props) => {
     (player: PlayerType) => player.userId === Cookies.get('userId'),
   );
   const votedPlayers = data?.data.votes.map((voted: any) => voted.targetName);
+  console.log(playerData);
   return (
     <div>
       {error && (
@@ -122,7 +125,7 @@ export const GameRoom = (props: Props) => {
         <div>
           <EntryModal
             isRoomMaster={data?.data.roomMaster === Cookies.get('userId') ? true : false}
-            playerData={playerData}
+            playerDataExists={playerData !== undefined}
             roomId={params.roomId}
           />
           <Typography variant="h2">
@@ -134,62 +137,70 @@ export const GameRoom = (props: Props) => {
           <Grid container className={classes.root} spacing={2}>
             {data?.data.players.map((player: PlayerType, index: number) => {
               const isUser = player.userId === Cookies.get('userId');
-              return (
-                <Grid
-                  item
-                  key={index}
-                  data-is-user={isUser}
-                  style={{ order: isUser ? -1 : 0 }}
-                >
-                  <PlayerCard
-                    name={player.name}
-                    role={
-                      player.userId === Cookies.get('userId') ||
-                      data?.data.roomMaster === Cookies.get('userId') ||
-                      (playerData !== undefined &&
-                        playerData.role === 'mafia' &&
-                        player.role === 'mafia') ||
-                      data?.data.status === 'ended'
-                        ? player.role
-                        : '???'
-                    }
-                    trueRole={player.role}
-                    checked={
-                      playerData !== undefined && playerData.role === 'detective'
-                        ? player.checked
-                        : false
-                    }
-                    status={player.status}
-                    isUser={player.userId === Cookies.get('userId')}
-                    isVotedOn={votedPlayers.includes(player.name)}
-                    phase={data?.data.phase}
-                    onKill={async (event) =>
-                      await killRequest(params.roomId, player.userId).catch((err) => {
-                        if (err.response.status >= 400)
-                          showErrorMessage(err.response.data.message);
-                      })
-                    }
-                    onHeal={async (event) =>
-                      await healRequest(params.roomId, player.userId).catch((err) => {
-                        if (err.response.status >= 400)
-                          showErrorMessage(err.response.data.message);
-                      })
-                    }
-                    onCheck={async (event) =>
-                      await checkRequest(params.roomId, player.userId).catch((err) => {
-                        if (err.response.status >= 400)
-                          showErrorMessage(err.response.data.message);
-                      })
-                    }
-                    onHang={async (event) =>
-                      await voteRequest(params.roomId, player.userId).catch((err) => {
-                        if (err.response.status >= 400)
-                          showErrorMessage(err.response.data.message);
-                      })
-                    }
-                  />
-                </Grid>
-              );
+
+              if (
+                ((Date.now() - player.last_poll.$date) / 1000 < 4 &&
+                  data?.data.phase === 'pre-game') ||
+                data?.data.phase !== 'pre-game'
+              ) {
+                return (
+                  <Grid
+                    item
+                    key={index}
+                    data-is-user={isUser}
+                    style={{ order: isUser ? -1 : 0 }}
+                  >
+                    <PlayerCard
+                      last_poll={player.last_poll}
+                      name={player.name}
+                      role={
+                        player.userId === Cookies.get('userId') ||
+                        data?.data.roomMaster === Cookies.get('userId') ||
+                        (playerData !== undefined &&
+                          playerData.role === 'mafia' &&
+                          player.role === 'mafia') ||
+                        data?.data.status === 'ended'
+                          ? player.role
+                          : '???'
+                      }
+                      trueRole={player.role}
+                      checked={
+                        playerData !== undefined && playerData.role === 'detective'
+                          ? player.checked
+                          : false
+                      }
+                      status={player.status}
+                      isUser={player.userId === Cookies.get('userId')}
+                      isVotedOn={votedPlayers.includes(player.name)}
+                      phase={data?.data.phase}
+                      onKill={async (event) =>
+                        await killRequest(params.roomId, player.userId).catch((err) => {
+                          if (err.response.status >= 400)
+                            showErrorMessage(err.response.data.message);
+                        })
+                      }
+                      onHeal={async (event) =>
+                        await healRequest(params.roomId, player.userId).catch((err) => {
+                          if (err.response.status >= 400)
+                            showErrorMessage(err.response.data.message);
+                        })
+                      }
+                      onCheck={async (event) =>
+                        await checkRequest(params.roomId, player.userId).catch((err) => {
+                          if (err.response.status >= 400)
+                            showErrorMessage(err.response.data.message);
+                        })
+                      }
+                      onHang={async (event) =>
+                        await voteRequest(params.roomId, player.userId).catch((err) => {
+                          if (err.response.status >= 400)
+                            showErrorMessage(err.response.data.message);
+                        })
+                      }
+                    />
+                  </Grid>
+                );
+              }
             })}
           </Grid>
 
@@ -238,23 +249,6 @@ export const GameRoom = (props: Props) => {
                     }
                   >
                     End Votes
-                  </Button>
-                  <Button
-                    variant="contained"
-                    disabled={
-                      Cookies.get('userId') !== data?.data.roomMaster ||
-                      data?.data.phase !== 'voting'
-                    }
-                    onClick={async () =>
-                      await nightStart(params.roomId)
-                        .then(styleNight)
-                        .catch((err) => {
-                          if (err.response.status >= 400)
-                            showErrorMessage(err.response.data.message);
-                        })
-                    }
-                  >
-                    Start Night
                   </Button>
                   <Button
                     variant="contained"

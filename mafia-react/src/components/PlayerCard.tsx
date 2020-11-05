@@ -20,6 +20,7 @@ export interface PlayerCardProps {
   checked: boolean;
   isUser: boolean;
   isVotedOn: boolean;
+  last_poll: { $date: number };
   onKill: (event: React.MouseEvent<unknown>) => void;
   onCheck: (event: React.MouseEvent<unknown>) => void;
   onHeal: (event: React.MouseEvent<unknown>) => void;
@@ -35,6 +36,7 @@ export const PlayerCard = ({
   checked,
   isUser,
   isVotedOn,
+  last_poll,
   onKill,
   onHeal,
   onCheck,
@@ -68,7 +70,8 @@ export const PlayerCard = ({
           <div className={classes.infoText}>
             <Card.Title className={classes.name}>{name}</Card.Title>
             <Card.Text>
-              {role}, {status}
+              {role}, {status},
+              {(Date.now() - last_poll.$date) / 1000 >= 4 ? ' offline' : ' online'}
             </Card.Text>
           </div>
         </div>
