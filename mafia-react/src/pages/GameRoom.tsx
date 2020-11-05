@@ -137,7 +137,6 @@ export const GameRoom = (props: Props) => {
           <Grid container className={classes.root} spacing={2}>
             {data?.data.players.map((player: PlayerType, index: number) => {
               const isUser = player.userId === Cookies.get('userId');
-
               if (
                 ((Date.now() - player.last_poll.$date) / 1000 < 4 &&
                   data?.data.phase === 'pre-game') ||
