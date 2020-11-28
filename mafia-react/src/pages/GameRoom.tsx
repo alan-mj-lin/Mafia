@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
 import { useBeforeunload } from 'react-beforeunload';
 
@@ -12,7 +12,7 @@ import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Slide from '@material-ui/core/Slide';
 import useScrollTrigger from '@material-ui/core/useScrollTrigger';
 
-import { useQuery } from 'react-query';
+import { useQuery, useQueryCache } from 'react-query';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { stringify } from 'querystring';
@@ -72,16 +72,38 @@ function HideOnScroll(props: Props) {
   );
 }
 
+async function fetchRoom(roomId: string, lastUpdated: string) {
+  const room = await axios.get(
+    `${API_URL}/room?roomId=${roomId}&lastUpdated=${lastUpdated}`,
+    {
+      withCredentials: true,
+    },
+  );
+  if (room.data.phase === 'voting') {
+    styleDay();
+  } else {
+    styleNight();
+  }
+  return room;
+}
+
 export const GameRoom = (props: Props) => {
+  const cache = useQueryCache();
   const classes = useStyles();
   const params = useParams<RouteParams>();
+  const cacheData = cache.getQueryData<any>(params.roomId);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const { isLoading, error, data } = useQuery(
+  const { isLoading, error, data, refetch, status } = useQuery(
     params.roomId,
     async () => {
-      const room = await axios.get(`${API_URL}/room?roomId=${params.roomId}`, {
-        withCredentials: true,
-      });
+      const room = await axios.get(
+        `${API_URL}/room?roomId=${params.roomId}&lastUpdated=${
+          cacheData !== undefined ? cacheData.data.lastUpdated.$date : 'null'
+        }`,
+        {
+          withCredentials: true,
+        },
+      );
       if (room.data.phase === 'voting') {
         styleDay();
       } else {
@@ -90,10 +112,16 @@ export const GameRoom = (props: Props) => {
       return room;
     },
     {
-      refetchInterval: 1000,
+      refetchInterval: 30000,
     },
   );
-
+  if (status == 'success') {
+    refetch();
+  } else if (status == 'error') {
+    // cache.setQueryData(params.roomId, data);
+    refetch();
+  }
+  if (cacheData !== undefined) console.log(cacheData.data.lastUpdated.$date);
   function showErrorMessage(message: string, delayToHide: number = 5000) {
     setErrorMessage(message);
     setTimeout(() => {
@@ -105,6 +133,7 @@ export const GameRoom = (props: Props) => {
   );
   const votedPlayers = data?.data.votes.map((voted: any) => voted.targetName);
   console.log(playerData);
+  console.log(data);
   return (
     <div>
       {error && (
@@ -137,69 +166,62 @@ export const GameRoom = (props: Props) => {
           <Grid container className={classes.root} spacing={2}>
             {data?.data.players.map((player: PlayerType, index: number) => {
               const isUser = player.userId === Cookies.get('userId');
-              if (
-                ((Date.now() - player.last_poll.$date) / 1000 < 4 &&
-                  data?.data.phase === 'pre-game') ||
-                data?.data.phase !== 'pre-game'
-              ) {
-                return (
-                  <Grid
-                    item
-                    key={index}
-                    data-is-user={isUser}
-                    style={{ order: isUser ? -1 : 0 }}
-                  >
-                    <PlayerCard
-                      last_poll={player.last_poll}
-                      name={player.name}
-                      role={
-                        player.userId === Cookies.get('userId') ||
-                        data?.data.roomMaster === Cookies.get('userId') ||
-                        (playerData !== undefined &&
-                          playerData.role === 'mafia' &&
-                          player.role === 'mafia') ||
-                        data?.data.status === 'ended'
-                          ? player.role
-                          : '???'
-                      }
-                      trueRole={player.role}
-                      checked={
-                        playerData !== undefined && playerData.role === 'detective'
-                          ? player.checked
-                          : false
-                      }
-                      status={player.status}
-                      isUser={player.userId === Cookies.get('userId')}
-                      isVotedOn={votedPlayers.includes(player.name)}
-                      phase={data?.data.phase}
-                      onKill={async (event) =>
-                        await killRequest(params.roomId, player.userId).catch((err) => {
-                          if (err.response.status >= 400)
-                            showErrorMessage(err.response.data.message);
-                        })
-                      }
-                      onHeal={async (event) =>
-                        await healRequest(params.roomId, player.userId).catch((err) => {
-                          if (err.response.status >= 400)
-                            showErrorMessage(err.response.data.message);
-                        })
-                      }
-                      onCheck={async (event) =>
-                        await checkRequest(params.roomId, player.userId).catch((err) => {
-                          if (err.response.status >= 400)
-                            showErrorMessage(err.response.data.message);
-                        })
-                      }
-                      onHang={async (event) =>
-                        await voteRequest(params.roomId, player.userId).catch((err) => {
-                          if (err.response.status >= 400)
-                            showErrorMessage(err.response.data.message);
-                        })
-                      }
-                    />
-                  </Grid>
-                );
-              }
+              return (
+                <Grid
+                  item
+                  key={index}
+                  data-is-user={isUser}
+                  style={{ order: isUser ? -1 : 0 }}
+                >
+                  <PlayerCard
+                    name={player.name}
+                    role={
+                      player.userId === Cookies.get('userId') ||
+                      data?.data.roomMaster === Cookies.get('userId') ||
+                      (playerData !== undefined &&
+                        playerData.role === 'mafia' &&
+                        player.role === 'mafia') ||
+                      data?.data.status === 'ended'
+                        ? player.role
+                        : '???'
+                    }
+                    trueRole={player.role}
+                    checked={
+                      playerData !== undefined && playerData.role === 'detective'
+                        ? player.checked
+                        : false
+                    }
+                    status={player.status}
+                    isUser={player.userId === Cookies.get('userId')}
+                    isVotedOn={votedPlayers.includes(player.name)}
+                    phase={data?.data.phase}
+                    onKill={async (event) =>
+                      await killRequest(params.roomId, player.userId).catch((err) => {
+                        if (err.response.status >= 400)
+                          showErrorMessage(err.response.data.message);
+                      })
+                    }
+                    onHeal={async (event) =>
+                      await healRequest(params.roomId, player.userId).catch((err) => {
+                        if (err.response.status >= 400)
+                          showErrorMessage(err.response.data.message);
+                      })
+                    }
+                    onCheck={async (event) =>
+                      await checkRequest(params.roomId, player.userId).catch((err) => {
+                        if (err.response.status >= 400)
+                          showErrorMessage(err.response.data.message);
+                      })
+                    }
+                    onHang={async (event) =>
+                      await voteRequest(params.roomId, player.userId).catch((err) => {
+                        if (err.response.status >= 400)
+                          showErrorMessage(err.response.data.message);
+                      })
+                    }
+                  />
+                </Grid>
+              );
             })}
           </Grid>
 
@@ -255,14 +277,15 @@ export const GameRoom = (props: Props) => {
                       Cookies.get('userId') !== data?.data.roomMaster ||
                       data?.data.status !== 'pre-game'
                     }
-                    onClick={async () =>
+                    onClick={async () => {
                       await gameStart(params.roomId)
                         .then(styleDay)
                         .catch((error) => {
                           if (error.response.status >= 400)
                             showErrorMessage(error.response.data.message);
-                        })
-                    }
+                        });
+                      await cache.refetchQueries([params.roomId]);
+                    }}
                   >
                     Start Game
                   </Button>

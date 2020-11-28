@@ -4,6 +4,7 @@ This is the main file to run.
 """
 import os
 import time
+import calendar
 import json
 import uuid
 import random
@@ -67,23 +68,23 @@ LOG.info(
 # will only return json for a particular room
 
 
-def mark_last_request(request):
-    roomId = request.args.get('roomId')
-    userId = request.cookies.get('userId')
-    try:
-        room = Room.objects.get(roomId=roomId)
-        player = room.get_player(userId)
-        if player is not None:
-            player.last_poll = datetime.utcnow()
-            room.save()
-    except Exception as e:
-        print(e)
+# def mark_last_request(request):
+#     roomId = request.args.get('roomId')
+#     userId = request.cookies.get('userId')
+#     try:
+#         room = Room.objects.get(roomId=roomId)
+#         player = room.get_player(userId)
+#         if player is not None:
+#             player.last_poll = datetime.utcnow()
+#             room.save()
+#     except Exception as e:
+#         print(e)
 
 
-@app.after_request
-def after_request(response):
-    mark_last_request(request)
-    return response
+# @app.after_request
+# def after_request(response):
+#     mark_last_request(request)
+#     return response
 
 
 @app.route('/room', methods=['GET', 'OPTIONS'])
@@ -95,12 +96,21 @@ def get_room_json():
         '%Y-%m-%d %H:%M:%S'), visiting_ips, request.access_route[0])
     userId = request.cookies.get('userId')
     roomId = request.args.get('roomId')
+    last_update = request.args.get('lastUpdated')
     try:
+        epoch = datetime.utcfromtimestamp(0)
         room = Room.objects.get(roomId=roomId)
         room.polling = True
         room.save()
-        room_data = json.loads(room.to_json())
-        return build_response(room_data, 200)
+        while True:
+            room.reload()
+            if last_update != 'null' and (room.lastUpdated - epoch).total_seconds() * 1000 != float(last_update):
+                room_data = json.loads(room.to_json())
+                return build_response(room_data, 200)
+            elif last_update == 'null':
+                room_data = json.loads(room.to_json())
+                return build_response(room_data, 200)
+            time.sleep(0.5)
     except DoesNotExist:
         return build_response({"message": "Not Found"}, 400)
     except Exception as e:
@@ -156,7 +166,7 @@ def join_room():
         return build_response({"message": "Observer connection"}, 200, setCookie=True, cookie='observer')
 
     new_player = Player(name=request.form.get('name'),
-                        userId=uuid.uuid4().hex, role='unassigned', status='alive', checked=False, last_poll=datetime.utcnow())
+                        userId=uuid.uuid4().hex, role='unassigned', status='alive', checked=False)
 
     try:
         room = Room.objects.get(roomId=roomId)
@@ -166,6 +176,7 @@ def join_room():
             if i.userId == userId:
                 return build_response({"message": "Player reconnected"}, 200)
         room.players.append(new_player)
+        room.lastUpdated = datetime.utcnow()
         room.save()
         return build_response({"message": "Player created"}, 201, setCookie=True, cookie=new_player.userId)
     except DoesNotExist:
@@ -211,6 +222,7 @@ def mafia_actions(roomId):
         if target_player.status == 'alive' and killer.status == 'alive':
             room.targets.killTarget = target_player.userId
             room.phase = 'doctor'
+            room.lastUpdated = datetime.utcnow()
             room.gameMessages.append(GameMessage(
                 primary='Doctor Phase', secondary='Doctor pick someone to heal'))
             room.observerMessages.append(ObserverMessage(
@@ -240,6 +252,7 @@ def doctor_actions(roomId):
         if target_player.status == 'alive' and doctor.status == 'alive':
             room.targets.healTarget = target_player.userId
             room.phase = 'detective'
+            room.lastUpdated = datetime.utcnow()
             room.gameMessages.append(
                 GameMessage(primary='Detective Phase', secondary='Detective pick someone to check'))
             room.observerMessages.append(
@@ -286,7 +299,7 @@ def detective_actions(roomId):
             room.phase = 'voting'
             room.gameMessages.append(
                 GameMessage(primary='Voting Phase', secondary='The night is over! Who is the mafia?'))
-
+        room.lastUpdated = datetime.utcnow()
         room.save()
         return build_response({"message": "Target confirmed"}, 200)
     except Exception as e:
@@ -309,6 +322,7 @@ def hang_action(roomId):
         voter = room.get_player(userId)
         target = room.get_player(targetId)
         if target.status == 'alive' and voter.status == 'alive':
+            room.lastUpdated = datetime.utcnow()
             room.votes.append(
                 Vote(userId=userId, targetId=target.userId, targetName=target.name))
             room.gameMessages.append(
@@ -339,6 +353,7 @@ def end_vote_phase(roomId):
         room.night += 1
         room.phase = 'mafia'
         room.update(votes=[])
+        room.lastUpdated = datetime.utcnow()
         room.gameMessages.append(
             GameMessage(primary="Night " + str(room.night), secondary="The night has begun!"))
         room.gameMessages.append(
@@ -366,6 +381,7 @@ def night_start(roomId):
             return build_response({"message": "Voting still ongoing"}, 400)
         room.night += 1
         room.phase = 'mafia'
+        room.lastUpdated = datetime.utcnow()
         room.gameMessages.append(
             GameMessage(primary="Night " + str(room.night), secondary="The night has begun!"))
         room.gameMessages.append(
@@ -391,12 +407,14 @@ def skip_turn(roomId):
             return build_response({"message": "Not room master"}, 400)
         if room.phase == 'mafia':
             room.phase = 'doctor'
+            room.lastUpdated = datetime.utcnow()
             room.gameMessages.append(
                 GameMessage(primary='Doctor Phase', secondary='Doctor pick someone to heal'))
             room.save()
             return build_response({"message": "Turn skipped"}, 200)
         elif room.phase == 'doctor':
             room.phase = 'detective'
+            room.lastUpdated = datetime.utcnow()
             room.gameMessages.append(
                 GameMessage(primary='Detective Phase', secondary='Detective pick someone to check'))
             room.save()
@@ -419,6 +437,7 @@ def skip_turn(roomId):
                 room.phase = 'voting'
                 room.gameMessages.append(
                     GameMessage(primary='Voting Phase', secondary='The night is over! Who is the mafia?'))
+            room.lastUpdated = datetime.utcnow()
             room.save()
             return build_response({"message": "Turn skipped"}, 200)
         return build_response({"message": "Not valid phase shift"}, 400)

@@ -22,7 +22,6 @@ class Player(EmbeddedDocument):
     role = StringField(required=True)
     status = StringField(required=True)
     checked = BooleanField(required=True)
-    last_poll = DateTimeField(default=datetime.utcnow(), required=True)
 
 
 class GameMessage(EmbeddedDocument):
@@ -54,6 +53,7 @@ class Room(Document):
     votes = ListField(EmbeddedDocumentField(Vote))
     gameMessages = ListField(EmbeddedDocumentField(GameMessage))
     observerMessages = ListField(EmbeddedDocumentField(ObserverMessage))
+    lastUpdated = DateTimeField(default=datetime.utcnow(), required=True)
 
     def active_mafia(self, userId):
         for player in self.players:
@@ -147,18 +147,9 @@ class Room(Document):
             return True
         return False
 
-    @property
-    def online_players(self):
-        return [player for player in self.players if (datetime.utcnow() - player.last_poll).total_seconds() < 4]
-
-    def update_players(self):
-        for player in self.players:
-            if (datetime.utcnow() - player.last_poll).total_seconds() >= 4:
-                self.update(pull__players=player)
-        self.save()
-
 
 def reset_test_room():
+    print(container_ip)
     connect('mafia', host=container_ip, port=27017)
     room = None
     try:
@@ -188,7 +179,6 @@ def reset_test_room():
     test_room.save()
     rooms = Room.objects(roomId='0001').to_json()
     print(rooms)
-    print(test_room.online_players)
     disconnect()
 
 
