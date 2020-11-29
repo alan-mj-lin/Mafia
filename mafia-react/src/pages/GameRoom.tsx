@@ -113,6 +113,7 @@ export const GameRoom = (props: Props) => {
     },
     {
       refetchInterval: 30000,
+      retry: true,
     },
   );
   if (status == 'success') {
