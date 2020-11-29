@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 from mongoengine import *
 from mongo_database import Room, Player, Target, Vote, GameMessage, ObserverMessage
 
@@ -7,8 +8,6 @@ def game_start_write(room):
     # shuffle the roles and assign them
     roles = []
     room_data = room
-    print(room_data.online_players)
-    room_data.update_players()
     room_data.reload()
     if len(room_data.players)/2 <= room_data.numMafia:
         return False
@@ -31,6 +30,7 @@ def game_start_write(room):
     room_data.night += 1
     room_data.status = 'in-progress'
     room_data.phase = 'mafia'
+    room.lastUpdated = datetime.utcnow()
     # game messages
     room_data.gameMessages.append(
         GameMessage(primary="Game Start", secondary="Room is no longer accepting new players"))
