@@ -51,5 +51,13 @@ export function skipTurnRequest(roomId: string): Promise<AxiosResponse> {
 }
 
 export function playerDisconnect(roomId: string): Promise<AxiosResponse> {
-  return axios.get(`${API_URL}/rooms/${roomId}/disconnect`, { withCredentials: true });
+  return axios.patch(`${API_URL}/actions/leave-room`, stringify({roomId: roomId}), { withCredentials: true });
+}
+
+export function removePlayer(roomId: string, targetId: string): Promise<AxiosResponse> {
+  return axios.patch(
+    `${API_URL}/rooms/${roomId}/remove`,
+    stringify({ targetId: targetId }),
+    { withCredentials: true },
+  );
 }

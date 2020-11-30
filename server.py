@@ -185,7 +185,52 @@ def join_room():
         print(e)
         return build_response({"message": "Unexpected server error"}, 500)
 
+
+@ app.route('/actions/leave-room', methods=['PATCH', 'OPTIONS'])
+@cross_origin(origins=cors_list, supports_credentials=True)
+def leave_room():
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
+    userId = request.cookies.get('userId')
+    roomId = request.form.get('roomId')
+    try:
+        room = Room.objects.get(roomId=roomId)
+        if room.status == 'pre-game':
+            player = room.get_player(userId)
+            room.update(pull__players=player)
+            room.lastUpdated = datetime.utcnow()
+            room.save()
+        return build_response({"message": "Disconnection"}, 200)
+    except DoesNotExist:
+        return build_response({"message": "Not Found"}, 400)
+    except Exception as e:
+        print(e)
+        return build_response({"message": "Unexpected server error"}, 500)
+
 # all routes for game actions ---------------------------
+
+
+@app.route('/rooms/<roomId>/remove', methods=['PATCH', 'OPTIONS'])
+@cross_origin(supports_credentials=True)
+def remove_player(roomId):
+    LOG.info(request.access_route[0] + ' requested ' + request.url)
+    userId = request.cookies.get('userId')
+    targetId = request.form.get('targetId')
+    try:
+        room = Room.objects.get(roomId=roomId)
+        if userId != room.roomMaster:
+            return build_response({"message": "Not room master"}, 400)
+        elif room.status != 'pre-game':
+            return build_response({"message": "Cannot remove player when game in progress"}, 400)
+        player = room.get_player(targetId)
+        room.update(pull__players=player)
+        room.lastUpdated = datetime.utcnow()
+        room.save()
+        return build_response({"message": "Player removed"}, 200)
+    except DoesNotExist:
+        return build_response({"message": "Not Found"}, 400)
+    except Exception as e:
+        print(e)
+        return build_response({"message": "Unexpected server error"}, 500)
 
 
 @app.route('/rooms/<roomId>/start', methods=['PATCH', 'OPTIONS'])
