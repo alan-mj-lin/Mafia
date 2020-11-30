@@ -74,21 +74,6 @@ function HideOnScroll(props: Props) {
   );
 }
 
-async function fetchRoom(roomId: string, lastUpdated: string) {
-  const room = await axios.get(
-    `${API_URL}/room?roomId=${roomId}&lastUpdated=${lastUpdated}`,
-    {
-      withCredentials: true,
-    },
-  );
-  if (room.data.phase === 'voting') {
-    styleDay();
-  } else {
-    styleNight();
-  }
-  return room;
-}
-
 export const GameRoom = (props: Props) => {
   const cache = useQueryCache();
   const classes = useStyles();
@@ -118,6 +103,11 @@ export const GameRoom = (props: Props) => {
       retry: true,
     },
   );
+  window.addEventListener('beforeunload', async (event) => {
+    event.preventDefault();
+    await playerDisconnect(params.roomId);
+    return null;
+  });
   if (status == 'success') {
     refetch();
   } else if (status == 'error') {

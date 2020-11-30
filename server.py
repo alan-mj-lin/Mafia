@@ -186,12 +186,13 @@ def join_room():
         return build_response({"message": "Unexpected server error"}, 500)
 
 
-@ app.route('/actions/leave-room', methods=['PATCH', 'OPTIONS'])
+@ app.route('/actions/leave-room', methods=['GET', 'OPTIONS'])
 @cross_origin(origins=cors_list, supports_credentials=True)
 def leave_room():
     LOG.info(request.access_route[0] + ' requested ' + request.url)
     userId = request.cookies.get('userId')
-    roomId = request.form.get('roomId')
+    roomId = request.args.get('roomId')
+    print('player leave')
     try:
         room = Room.objects.get(roomId=roomId)
         if room.status == 'pre-game':
