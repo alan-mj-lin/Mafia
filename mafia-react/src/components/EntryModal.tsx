@@ -27,29 +27,22 @@ export const EntryModal = ({
 }: EntryModalProps) => {
   const classes = useStyles();
   const [displayName, setDisplayName] = useState<string>('');
-
-  console.log(playerDataExists);
+  const [isOpen, setIsOpen] = useState<boolean>(
+    playerDataExists || Cookies.get('userId') === 'observer' || isRoomMaster
+      ? false
+      : true,
+  );
   return (
     <Modal
       className={classes.modal}
-      open={
-        playerDataExists || Cookies.get('userId') === 'observer' || isRoomMaster
-          ? false
-          : true
-      }
+      open={isOpen}
       closeAfterTransition
       BackdropComponent={Backdrop}
       BackdropProps={{
         timeout: 500,
       }}
     >
-      <Fade
-        in={
-          playerDataExists || Cookies.get('userId') === 'observer' || isRoomMaster
-            ? false
-            : true
-        }
-      >
+      <Fade in={isOpen}>
         <div className={classes.paper}>
           <h2 id="transition-modal-title">Room {roomId}</h2>
           <TextField
@@ -73,6 +66,7 @@ export const EntryModal = ({
                 .then((data) => {
                   console.log(data);
                 });
+              setIsOpen(!isOpen);
             }}
           >
             Join Room
@@ -92,6 +86,7 @@ export const EntryModal = ({
                 .then((data) => {
                   console.log(data);
                 });
+              setIsOpen(!isOpen);
             }}
           >
             Observe
