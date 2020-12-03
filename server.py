@@ -68,25 +68,6 @@ LOG.info(
 # will only return json for a particular room
 
 
-# def mark_last_request(request):
-#     roomId = request.args.get('roomId')
-#     userId = request.cookies.get('userId')
-#     try:
-#         room = Room.objects.get(roomId=roomId)
-#         player = room.get_player(userId)
-#         if player is not None:
-#             player.last_poll = datetime.utcnow()
-#             room.save()
-#     except Exception as e:
-#         print(e)
-
-
-# @app.after_request
-# def after_request(response):
-#     mark_last_request(request)
-#     return response
-
-
 @app.route('/room', methods=['GET', 'OPTIONS'])
 @cross_origin(origins=cors_list, supports_credentials=True)
 def get_room_json():
