@@ -48,7 +48,12 @@ interface PlayerType {
   status: string;
   userId: string;
   checked: boolean;
-  last_poll: { $date: number };
+}
+
+interface VoteType {
+  userId: string;
+  targetId: string;
+  targetName: string;
 }
 
 interface Props {
@@ -83,14 +88,21 @@ export const GameRoom = (props: Props) => {
   const { isLoading, error, data, refetch, status } = useQuery(
     params.roomId,
     async () => {
-      const room = await axios.get(
-        `${API_URL}/room?roomId=${params.roomId}&lastUpdated=${
-          cacheData !== undefined ? cacheData.data.lastUpdated.$date : 'null'
-        }`,
-        {
-          withCredentials: true,
-        },
-      );
+      const room = await axios
+        .get(
+          `${API_URL}/room?roomId=${params.roomId}&lastUpdated=${
+            cacheData !== undefined ? cacheData.data.lastUpdated.$date : 'null'
+          }`,
+          {
+            withCredentials: true,
+          },
+        )
+        .catch((err) => {
+          if (err.response) {
+            return err.response;
+          }
+        });
+      console.log(room);
       if (room.data.phase === 'voting') {
         styleDay();
       } else {
@@ -99,34 +111,38 @@ export const GameRoom = (props: Props) => {
       return room;
     },
     {
-      refetchInterval: 30000,
       retry: true,
     },
   );
+  console.log(data?.status);
   window.addEventListener('beforeunload', async (event) => {
     event.preventDefault();
     await playerDisconnect(params.roomId);
     return null;
   });
   if (status == 'success') {
-    refetch();
+    if (data?.status === 504 || data?.status === 200) refetch();
   } else if (status == 'error') {
-    // cache.setQueryData(params.roomId, data);
     refetch();
   }
-  if (cacheData !== undefined) console.log(cacheData.data.lastUpdated.$date);
   function showErrorMessage(message: string, delayToHide: number = 5000) {
     setErrorMessage(message);
     setTimeout(() => {
       setErrorMessage('');
     }, delayToHide);
   }
-  const playerData = data?.data.players.find(
-    (player: PlayerType) => player.userId === Cookies.get('userId'),
-  );
-  const votedPlayers = data?.data.votes.map((voted: any) => voted.targetName);
-  console.log(playerData);
   console.log(data);
+  const playerData: PlayerType | undefined =
+    data?.status === 200
+      ? data?.data.players.find(
+          (player: PlayerType) => player.userId === Cookies.get('userId'),
+        )
+      : undefined;
+
+  const votedPlayers: string[] | undefined =
+    data?.status === 200
+      ? data?.data.votes.map((voted: VoteType) => voted.targetName)
+      : undefined;
   return (
     <div>
       {error && (
@@ -136,14 +152,14 @@ export const GameRoom = (props: Props) => {
           }}
         />
       )}
-      {!isLoading && data?.status !== 200 && (
+      {!isLoading && data?.status !== 200 && data?.status !== 504 && (
         <Redirect
           to={{
             pathname: '/notfound',
           }}
         />
       )}
-      {!isLoading && data?.status === 200 && (
+      {!isLoading && data?.status === 200 && votedPlayers !== undefined && (
         <div>
           <EntryModal
             isRoomMaster={data?.data.roomMaster === Cookies.get('userId') ? true : false}
