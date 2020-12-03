@@ -102,7 +102,6 @@ export const GameRoom = (props: Props) => {
             return err.response;
           }
         });
-      console.log(room);
       if (room.data.phase === 'voting') {
         styleDay();
       } else {
@@ -114,7 +113,6 @@ export const GameRoom = (props: Props) => {
       retry: true,
     },
   );
-  console.log(data?.status);
   window.addEventListener('beforeunload', async (event) => {
     event.preventDefault();
     await playerDisconnect(params.roomId);
@@ -131,7 +129,6 @@ export const GameRoom = (props: Props) => {
       setErrorMessage('');
     }, delayToHide);
   }
-  console.log(data);
   const playerData: PlayerType | undefined =
     data?.status === 200
       ? data?.data.players.find(
