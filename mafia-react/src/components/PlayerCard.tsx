@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Card, Button, ButtonGroup } from 'react-bootstrap';
+import { Card, Button, ButtonGroup, Dropdown, DropdownButton } from 'react-bootstrap';
 
 import Avatar from '@material-ui/core/Avatar';
 import { red, green, grey } from '@material-ui/core/colors';
@@ -10,6 +10,8 @@ import spyicon from '../images/spyicon.png';
 import spyiconX from '../images/spyicon-x.png';
 import spyiconInverted from '../images/spyicon-inverted.png';
 import spyiconInvertedX from '../images/spyicon-inverted-x.png';
+
+import { BsXCircleFill } from 'react-icons/bs';
 
 export interface PlayerCardProps {
   name: string;
@@ -24,6 +26,7 @@ export interface PlayerCardProps {
   onCheck: (event: React.MouseEvent<unknown>) => void;
   onHeal: (event: React.MouseEvent<unknown>) => void;
   onHang: (event: React.MouseEvent<unknown>) => void;
+  onRemove: (event: React.MouseEvent<unknown>) => void;
 }
 
 export const PlayerCard = ({
@@ -39,6 +42,7 @@ export const PlayerCard = ({
   onHeal,
   onCheck,
   onHang,
+  onRemove,
 }: PlayerCardProps) => {
   const classes = useStyles();
   let avatar;
@@ -73,40 +77,62 @@ export const PlayerCard = ({
           </div>
         </div>
         <hr></hr>
-        <ButtonGroup style={{ visibility: isDead ? 'hidden' : 'visible' }}>
+        <div
+          style={{
+            gridGap: '1em',
+            gridAutoFlow: 'column',
+            display: 'grid',
+            justifyContent: 'space-evenly',
+          }}
+        >
+          <DropdownButton
+            id={name}
+            title="Actions"
+            style={{ visibility: isDead ? 'hidden' : 'visible' }}
+          >
+            <Dropdown.Item
+              className={classes.actionButton}
+              variant="primary"
+              disabled={phase !== 'mafia'}
+              onClick={(event) => onKill(event)}
+            >
+              Kill
+            </Dropdown.Item>
+            <Dropdown.Item
+              className={classes.actionButton}
+              variant="primary"
+              disabled={phase !== 'detective'}
+              onClick={(event) => onCheck(event)}
+            >
+              Check
+            </Dropdown.Item>
+            <Dropdown.Item
+              className={classes.actionButton}
+              variant="primary"
+              disabled={phase !== 'doctor'}
+              onClick={(event) => onHeal(event)}
+            >
+              Heal
+            </Dropdown.Item>
+            <Dropdown.Item
+              className={classes.actionButton}
+              variant="primary"
+              disabled={phase !== 'voting'}
+              onClick={(event) => onHang(event)}
+            >
+              Hang
+            </Dropdown.Item>
+          </DropdownButton>
+          <br />
           <Button
             className={classes.actionButton}
-            variant="primary"
-            disabled={phase !== 'mafia'}
-            onClick={(event) => onKill(event)}
+            variant="warning"
+            disabled={phase !== 'pre-game'}
+            onClick={(event) => onRemove(event)}
           >
-            Kill
+            <BsXCircleFill />
           </Button>
-          <Button
-            className={classes.actionButton}
-            variant="primary"
-            disabled={phase !== 'detective'}
-            onClick={(event) => onCheck(event)}
-          >
-            Check
-          </Button>
-          <Button
-            className={classes.actionButton}
-            variant="primary"
-            disabled={phase !== 'doctor'}
-            onClick={(event) => onHeal(event)}
-          >
-            Heal
-          </Button>
-          <Button
-            className={classes.actionButton}
-            variant="primary"
-            disabled={phase !== 'voting'}
-            onClick={(event) => onHang(event)}
-          >
-            Hang
-          </Button>
-        </ButtonGroup>
+        </div>
       </Card.Body>
     </Card>
   );
