@@ -85,7 +85,7 @@ export const GameRoom = (props: Props) => {
   const params = useParams<RouteParams>();
   const cacheData = cache.getQueryData<any>(params.roomId);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const { isLoading, error, data, refetch, status } = useQuery(
+  const { isLoading, error, data, refetch, status, isError } = useQuery(
     params.roomId,
     async () => {
       const room = await axios
@@ -98,7 +98,8 @@ export const GameRoom = (props: Props) => {
           },
         )
         .catch((err) => {
-          if (err.response) {
+          if (err.response.status !== 504) {
+            console.log(err.response.status);
             return err.response;
           }
         });
@@ -140,7 +141,7 @@ export const GameRoom = (props: Props) => {
     data?.status === 200
       ? data?.data.votes.map((voted: VoteType) => voted.targetName)
       : undefined;
-  console.log(data, status, isLoading);
+  console.log(data, status, isLoading, isError);
   return (
     <div>
       {error && (
