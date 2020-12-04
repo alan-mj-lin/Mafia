@@ -140,6 +140,7 @@ export const GameRoom = (props: Props) => {
     data?.status === 200
       ? data?.data.votes.map((voted: VoteType) => voted.targetName)
       : undefined;
+  console.log(data, status, isLoading);
   return (
     <div>
       {error && (
